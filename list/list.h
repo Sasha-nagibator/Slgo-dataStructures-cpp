@@ -19,216 +19,158 @@ namespace lab618 {
     public:
         class CIterator {
         public:
-            CIterator();
 
-            CIterator(leaf *p);
+            CIterator()
+                    : m_pCurrent(nullptr), m_pBegin(nullptr) {}
 
-            CIterator(const CIterator &src);
 
-            ~CIterator();
+            CIterator(leaf *p)
+                    : m_pCurrent(p), m_pBegin(p) {}
 
-            CIterator &operator=(const CIterator &src);
+            CIterator(const CIterator &src)
+                    : m_pCurrent(src.m_pCurrent), m_pBegin(src.m_pBegin) {}
 
-            bool operator!=(const CIterator &it) const;
+            ~CIterator() {}
 
-            void operator++();
+            CIterator &
+            operator=(const CIterator &src) {
+              if (this != &src) {
+                m_pCurrent = src.m_pCurrent;
+                m_pBegin = src.m_pBegin;
+              }
+              return *this;
+            }
 
-            T &getData();
 
-            T &operator*();
+            bool operator!=(const CIterator &it) const {
+              return (m_pCurrent != it.m_pCurrent);
+            }
 
-            leaf *getLeaf();
+            void operator++() {
+              if (m_pCurrent != nullptr) m_pCurrent = m_pCurrent->pNext;
+            }
 
-            void setLeaf(leaf *p);
 
-            void setLeafPreBegin(leaf *p);
+            T& getData() {
+              return m_pCurrent->data;
+            }
 
-            bool isValid();
+
+            T& operator*() {
+              return m_pCurrent->data;
+            }
+
+            leaf* getLeaf() {
+              return m_pCurrent;
+            }
+
+            void setLeaf(leaf *p) {
+              m_pCurrent = p;
+            }
+
+            void setLeafPreBegin(leaf *p) {
+              m_pBegin = p;
+            }
+
+            bool isValid() {
+              return (m_pCurrent != nullptr);
+            }
 
         private:
             leaf *m_pCurrent;
             leaf *m_pBegin;
         };
 
-        CSingleLinkedList();
+        CSingleLinkedList()
+                : m_pBegin(nullptr), m_pEnd(nullptr) {}
 
-        ~CSingleLinkedList();
+        ~CSingleLinkedList() {
+          clear();
+        }
 
-        void pushBack(T &data);
+        void pushBack(T &data) {
+          leaf *pNew = new leaf(data, nullptr);
+          if (!m_pBegin) {
+            m_pBegin = pNew;
+          } else {
+            m_pEnd->pNext = pNew;
+          }
+          m_pEnd = pNew;
+        }
 
-        void pushFront(T &data);
+        void pushFront(T &data) {
+          leaf *pNew = new leaf(data, m_pBegin);
+          m_pBegin = pNew;
+          if (!m_pEnd) {
+            m_pEnd = pNew;
+          }
+        }
 
-        T popFront();
+        T popFront() {
+          if (!m_pBegin) {
+            throw std::out_of_range("List is empty");
+          }
 
-        void erase(CIterator &it);
+          T data = m_pBegin->data;
+          leaf *pDel = m_pBegin;
+          m_pBegin = m_pBegin->pNext;
+          delete pDel;
 
-        int getSize();
+          if (!m_pBegin) {
+            m_pEnd = nullptr;
+          }
 
-        void clear();
+          return data;
+        }
 
-        CIterator begin();
+        void erase(CIterator &it) {
+          if (!it.isValid()) {
+            throw std::out_of_range("Invalid iterator");
+          }
+
+          leaf *pDel = it.getLeaf();
+          if (pDel == m_pBegin) {
+            m_pBegin = pDel->pNext;
+          } else {
+            // Находим элемент перед удаляемым
+            CIterator prevIt = begin();
+            while (prevIt.getLeaf() && prevIt.getLeaf()->pNext != pDel) {
+              ++prevIt;
+            }
+            prevIt.getLeaf()->pNext = pDel->pNext;
+          }
+
+          if (pDel == m_pEnd) {
+            m_pEnd = it.getLeaf()->pNext;
+          }
+        }
+
+        int getSize() {
+          int size = 0;
+          leaf *current = m_pBegin;
+          while (current != nullptr) {
+            ++size;
+            current = current->pNext;
+          }
+          return size;
+        }
+
+        void clear() {
+          while (m_pBegin != nullptr) {
+            leaf *temp = m_pBegin;
+            m_pBegin = m_pBegin->pNext;
+            delete temp;
+          }
+        }
+
+        CIterator begin() {
+          return CIterator(m_pBegin);
+        }
     };
 
-    template <class T>
-    CSingleLinkedList<T>::CIterator::CIterator()
-            : m_pCurrent(nullptr), m_pBegin(nullptr) {}
 
-    template <class T>
-    CSingleLinkedList<T>::CIterator::CIterator(leaf *p)
-            : m_pCurrent(p), m_pBegin(p) {}
 
-    template <class T>
-    CSingleLinkedList<T>::CIterator::CIterator(const CIterator &src)
-            : m_pCurrent(src.m_pCurrent), m_pBegin(src.m_pBegin) {}
 
-    template <class T>
-    CSingleLinkedList<T>::CIterator::~CIterator() {}
-
-    template <class T>
-    typename CSingleLinkedList<T>::CIterator &
-    CSingleLinkedList<T>::CIterator::operator=(const CIterator &src) {
-      if (this != &src) {
-        m_pCurrent = src.m_pCurrent;
-        m_pBegin = src.m_pBegin;
-      }
-      return *this;
-    }
-
-    template <class T>
-    bool CSingleLinkedList<T>::CIterator::operator!=(const CIterator &it) const {
-      return (m_pCurrent != it.m_pCurrent);
-    }
-
-    template <class T>
-    void CSingleLinkedList<T>::CIterator::operator++() {
-      if (m_pCurrent != nullptr) m_pCurrent = m_pCurrent->pNext;
-    }
-
-    template <class T>
-    T &CSingleLinkedList<T>::CIterator::getData() {
-      return m_pCurrent->data;
-    }
-
-    template <class T>
-    T &CSingleLinkedList<T>::CIterator::operator*() {
-      return m_pCurrent->data;
-    }
-
-    template <class T>
-    typename CSingleLinkedList<T>::leaf *
-    CSingleLinkedList<T>::CIterator::getLeaf() {
-      return m_pCurrent;
-    }
-
-    template <class T>
-    void CSingleLinkedList<T>::CIterator::setLeaf(leaf *p) {
-      m_pCurrent = p;
-    }
-
-    template <class T>
-    void CSingleLinkedList<T>::CIterator::setLeafPreBegin(leaf *p) {
-      m_pBegin = p;
-    }
-
-    template <class T>
-    bool CSingleLinkedList<T>::CIterator::isValid() {
-      return (m_pCurrent != nullptr);
-    }
-
-    template <class T>
-    CSingleLinkedList<T>::CSingleLinkedList()
-            : m_pBegin(nullptr), m_pEnd(nullptr) {}
-
-    template <class T>
-    CSingleLinkedList<T>::~CSingleLinkedList() {
-      clear();
-    }
-
-    template <class T>
-    void CSingleLinkedList<T>::pushBack(T &data) {
-      leaf *pNew = new leaf(data, nullptr);
-      if (!m_pBegin) {
-        m_pBegin = pNew;
-      } else {
-        m_pEnd->pNext = pNew;
-      }
-      m_pEnd = pNew;
-    }
-
-    template <class T>
-    void CSingleLinkedList<T>::pushFront(T &data) {
-      leaf *pNew = new leaf(data, m_pBegin);
-      m_pBegin = pNew;
-      if (!m_pEnd) {
-        m_pEnd = pNew;
-      }
-    }
-
-    template <class T>
-    T CSingleLinkedList<T>::popFront() {
-      if (!m_pBegin) {
-        throw std::out_of_range("List is empty");
-      }
-
-      T data = m_pBegin->data;
-      leaf *pDel = m_pBegin;
-      m_pBegin = m_pBegin->pNext;
-      delete pDel;
-
-      if (!m_pBegin) {
-        m_pEnd = nullptr;
-      }
-
-      return data;
-    }
-
-    template <class T>
-    void CSingleLinkedList<T>::erase(CIterator &it) {
-      if (!it.isValid()) {
-        throw std::out_of_range("Invalid iterator");
-      }
-
-      leaf *pDel = it.getLeaf();
-      if (pDel == m_pBegin) {
-        m_pBegin = pDel->pNext;
-      } else {
-        // Находим элемент перед удаляемым
-        CIterator prevIt = begin();
-        while (prevIt.getLeaf() && prevIt.getLeaf()->pNext != pDel) {
-          ++prevIt;
-        }
-        prevIt.getLeaf()->pNext = pDel->pNext;
-      }
-
-      if (pDel == m_pEnd) {
-        m_pEnd = it.getLeaf()->pNext;
-      }
-    }
-
-    template <class T>
-    int CSingleLinkedList<T>::getSize() {
-      int size = 0;
-      leaf *current = m_pBegin;
-      while (current != nullptr) {
-        ++size;
-        current = current->pNext;
-      }
-      return size;
-    }
-
-    template <class T>
-    void CSingleLinkedList<T>::clear() {
-      while (m_pBegin != nullptr) {
-        leaf *temp = m_pBegin;
-        m_pBegin = m_pBegin->pNext;
-        delete temp;
-      }
-    }
-
-    template <class T>
-    typename CSingleLinkedList<T>::CIterator CSingleLinkedList<T>::begin() {
-      return CIterator(m_pBegin);
-    }
 
 //-------------------------CDualLinkedList-----------------------------------
 
@@ -248,38 +190,93 @@ namespace lab618 {
     public:
         class CIterator {
         public:
-            CIterator();
+            CIterator()
+                    : m_pBegin(nullptr), m_pCurrent(nullptr), m_pEnd(nullptr) {}
 
-            CIterator(leaf *p);
+            CIterator(leaf *p)
+                    : m_pBegin(nullptr), m_pCurrent(p), m_pEnd(nullptr) {}
 
-            CIterator(const CIterator &src);
+            CIterator(const CIterator &src)
+                    : m_pBegin(src.m_pBegin), m_pCurrent(src.m_pCurrent), m_pEnd(src.m_pEnd) {}
 
-            ~CIterator();
-            CIterator &operator=(const CIterator &src);
+            ~CIterator() {}
 
-            bool operator!=(const CIterator &it) const;
+            CIterator &
+            operator=(const CIterator &src) {
+              m_pBegin = src.m_pBegin;
+              m_pCurrent = src.m_pCurrent;
+              m_pEnd = src.m_pEnd;
+              return *this;
+            }
 
-            void operator++();
+            bool operator!=(const CIterator &it) const {
+              return m_pCurrent != it.m_pCurrent;
+            }
 
-            void operator--();
+            void operator++() {
+              if (!isValid()) {
+                throw std::runtime_error("Invalid iterator");
+              }
 
-            T &getData();
+              if (m_pCurrent)
+                m_pCurrent = m_pCurrent->pNext;
+              else
+                m_pCurrent = m_pBegin;
+            }
 
-            T &operator*();
+            void operator--() {
+              if (!isValid()) {
+                throw std::runtime_error("Invalid iterator");
+              }
 
-            leaf *getLeaf();
+              if (m_pCurrent)
+                m_pCurrent = m_pCurrent->pPrev;
+              else
+                m_pCurrent = m_pEnd;
+            }
 
-            // применяется в erase и eraseAndNext
-            void setLeaf(leaf *p);
+            T& getData() {
+              if (!isValid()) {
+                throw std::runtime_error("Invalid iterator");
+              }
 
-            // применяется в erase и eraseAndNext
-            void setLeafPreBegin(leaf *p);
+              return m_pCurrent->data;
+            }
 
-            // применяется в erase и eraseAndNext
-            void setLeafPostEnd(leaf *p);
+            T& operator*() {
+              return getData();
+            }
 
-            bool isValid();
+            leaf * getLeaf() {
+              if (!isValid()) {
+                return nullptr;
+              }
 
+              return m_pCurrent;
+            }
+
+            void setLeaf(
+                    typename CDualLinkedList<T>::leaf *p) {
+              m_pCurrent = p;
+            }
+
+            void setLeafPreBegin(
+                    typename CDualLinkedList<T>::leaf *p) {
+              m_pBegin = nullptr;
+              m_pCurrent = nullptr;
+              m_pEnd = p;
+            }
+
+            void setLeafPostEnd(
+                    typename CDualLinkedList<T>::leaf *p) {
+              m_pBegin = p;
+              m_pCurrent = nullptr;
+              m_pEnd = nullptr;
+            }
+
+            bool isValid() {
+              return (m_pCurrent != nullptr);
+            }
         private:
             //храним голову списка, если мы находимся перед началом
             leaf *m_pBegin;
@@ -290,269 +287,136 @@ namespace lab618 {
         };
 
     public:
-        CDualLinkedList();
+        CDualLinkedList() : m_pBegin(nullptr), m_pEnd(nullptr) {}
 
-        virtual ~CDualLinkedList();
+        ~CDualLinkedList() {
+          clear();
+        }
 
-        void pushBack(T &data);
+        void pushBack(T &data) {
+          leaf *pNew = new leaf(data, m_pEnd, nullptr);
+          if (!m_pBegin) m_pBegin = pNew;
+          if (m_pEnd) m_pEnd->pNext = pNew;
+          m_pEnd = pNew;
+        }
 
-        T popBack();
+        T popBack() {
+          if (!m_pEnd) throw std::runtime_error("List is empty");
 
-        void pushFront(T &data);
+          T data = m_pEnd->data;
+          leaf *pTemp = m_pEnd;
 
-        T popFront();
+          m_pEnd = m_pEnd->pPrev;
+          if (m_pEnd)
+            m_pEnd->pNext = nullptr;
+          else
+            m_pBegin = nullptr;
 
-        // изменяет состояние итератора. выставляет предыдущую позицию.
-        void erase(CIterator &it);
+          delete pTemp;
+          return data;
+        }
 
-        // изменяет состояние итератора. выставляет следующую позицию.
-        void eraseAndNext(CIterator &it);
+        void pushFront(T &data) {
+          leaf *pNew = new leaf(data, nullptr, m_pBegin);
+          if (!m_pEnd) m_pEnd = pNew;
+          if (m_pBegin) m_pBegin->pPrev = pNew;
+          m_pBegin = pNew;
+        }
 
-        int getSize();
+        T popFront() {
+          if (!m_pBegin) throw std::runtime_error("List is empty");
 
-        void clear();
-        CIterator begin();
+          T data = m_pBegin->data;
+          leaf *pTemp = m_pBegin;
 
-        CIterator end();
+          m_pBegin = m_pBegin->pNext;
+          if (m_pBegin)
+            m_pBegin->pPrev = nullptr;
+          else
+            m_pEnd = nullptr;
 
+          delete pTemp;
+          return data;
+        }
+
+        void erase(CIterator &it) {
+          if (!it.isValid()) {
+            throw std::runtime_error("Invalid iterator");
+          }
+
+          leaf *pTemp = it.getLeaf();
+          if (pTemp->pPrev)
+            pTemp->pPrev->pNext = pTemp->pNext;
+          else
+            m_pBegin = pTemp->pNext;
+
+          if (pTemp->pNext)
+            pTemp->pNext->pPrev = pTemp->pPrev;
+          else
+            m_pEnd = pTemp->pPrev;
+
+          it.setLeaf(pTemp->pNext);
+          delete pTemp;
+          it.setLeaf(pTemp->pPrev);
+        }
+
+        void eraseAndNext(CIterator &it) {
+          if (!it.isValid()) {
+            throw std::runtime_error("Invalid iterator");
+          }
+
+          leaf *pTemp = it.getLeaf();
+          it.setLeaf(pTemp->pNext);
+          if (pTemp->pPrev)
+            pTemp->pPrev->pNext = pTemp->pNext;
+          else
+            m_pBegin = pTemp->pNext;
+
+          if (pTemp->pNext)
+            pTemp->pNext->pPrev = pTemp->pPrev;
+          else
+            m_pEnd = pTemp->pPrev;
+
+          it.setLeaf(pTemp->pNext);
+          delete pTemp;
+        }
+
+        int getSize() {
+          int size = 0;
+          leaf *pTemp = m_pBegin;
+          while (pTemp) {
+            ++size;
+            pTemp = pTemp->pNext;
+          }
+          return size;
+        }
+
+        void clear() {
+          while (m_pBegin) {
+            leaf *pTemp = m_pBegin;
+            m_pBegin = m_pBegin->pNext;
+            delete pTemp;
+          }
+
+          m_pEnd = nullptr;
+        }
+
+        CIterator begin() {
+          return CIterator(m_pBegin);
+        }
+
+        CIterator end() {
+          return CIterator(m_pEnd);
+        }
     private:
         //храним голову и хвост списка
         leaf *m_pBegin, *m_pEnd;
 
-        // применяется в erase и eraseAndNext, чтобы не копировать код
-        void updateAndDeleteLeaf(CIterator &it, leaf *pTemp);
     };
 
-    template <class T>
-    CDualLinkedList<T>::CIterator::CIterator()
-            : m_pBegin(nullptr), m_pCurrent(nullptr), m_pEnd(nullptr) {}
 
-    template <class T>
-    CDualLinkedList<T>::CIterator::CIterator(leaf *p)
-            : m_pBegin(nullptr), m_pCurrent(p), m_pEnd(nullptr) {}
 
-    template <class T>
-    CDualLinkedList<T>::CIterator::CIterator(const CIterator &src)
-            : m_pBegin(src.m_pBegin), m_pCurrent(src.m_pCurrent), m_pEnd(src.m_pEnd) {}
 
-    template <class T>
-    CDualLinkedList<T>::CIterator::~CIterator() {}
-
-    template <class T>
-    typename CDualLinkedList<T>::CIterator &
-    CDualLinkedList<T>::CIterator::operator=(const CIterator &src) {
-      m_pBegin = src.m_pBegin;
-      m_pCurrent = src.m_pCurrent;
-      m_pEnd = src.m_pEnd;
-      return *this;
-    }
-
-    template <class T>
-    bool CDualLinkedList<T>::CIterator::operator!=(const CIterator &it) const {
-      return m_pCurrent != it.m_pCurrent;
-    }
-
-    template <class T>
-    void CDualLinkedList<T>::CIterator::operator++() {
-      if (!isValid()) {
-        throw std::runtime_error("Invalid iterator");
-      }
-
-      if (m_pCurrent)
-        m_pCurrent = m_pCurrent->pNext;
-      else
-        m_pCurrent = m_pBegin;
-    }
-
-    template <class T>
-    void CDualLinkedList<T>::CIterator::operator--() {
-      if (!isValid()) {
-        throw std::runtime_error("Invalid iterator");
-      }
-
-      if (m_pCurrent)
-        m_pCurrent = m_pCurrent->pPrev;
-      else
-        m_pCurrent = m_pEnd;
-    }
-
-    template <class T>
-    T &CDualLinkedList<T>::CIterator::getData() {
-      if (!isValid()) {
-        throw std::runtime_error("Invalid iterator");
-      }
-
-      return m_pCurrent->data;
-    }
-
-    template <class T>
-    T &CDualLinkedList<T>::CIterator::operator*() {
-      return getData();
-    }
-
-    template <class T>
-    typename CDualLinkedList<T>::leaf *CDualLinkedList<T>::CIterator::getLeaf() {
-      if (!isValid()) {
-        return nullptr;
-      }
-
-      return m_pCurrent;
-    }
-
-    template <class T>
-    void CDualLinkedList<T>::CIterator::setLeaf(
-            typename CDualLinkedList<T>::leaf *p) {
-      m_pCurrent = p;
-    }
-
-    template <class T>
-    void CDualLinkedList<T>::CIterator::setLeafPreBegin(
-            typename CDualLinkedList<T>::leaf *p) {
-      m_pBegin = nullptr;
-      m_pCurrent = nullptr;
-      m_pEnd = p;
-    }
-
-    template <class T>
-    void CDualLinkedList<T>::CIterator::setLeafPostEnd(
-            typename CDualLinkedList<T>::leaf *p) {
-      m_pBegin = p;
-      m_pCurrent = nullptr;
-      m_pEnd = nullptr;
-    }
-
-    template <class T>
-    bool CDualLinkedList<T>::CIterator::isValid() {
-      return (m_pCurrent != nullptr);
-    }
-
-    template <class T>
-    CDualLinkedList<T>::CDualLinkedList() : m_pBegin(nullptr), m_pEnd(nullptr) {}
-
-    template <class T>
-    CDualLinkedList<T>::~CDualLinkedList() {
-      clear();
-    }
-
-    template <class T>
-    void CDualLinkedList<T>::pushBack(T &data) {
-      leaf *pNew = new leaf(data, m_pEnd, nullptr);
-      if (!m_pBegin) m_pBegin = pNew;
-      if (m_pEnd) m_pEnd->pNext = pNew;
-      m_pEnd = pNew;
-    }
-
-    template <class T>
-    T CDualLinkedList<T>::popBack() {
-      if (!m_pEnd) throw std::runtime_error("List is empty");
-
-      T data = m_pEnd->data;
-      leaf *pTemp = m_pEnd;
-
-      m_pEnd = m_pEnd->pPrev;
-      if (m_pEnd)
-        m_pEnd->pNext = nullptr;
-      else
-        m_pBegin = nullptr;
-
-      delete pTemp;
-      return data;
-    }
-
-    template <class T>
-    void CDualLinkedList<T>::pushFront(T &data) {
-      leaf *pNew = new leaf(data, nullptr, m_pBegin);
-      if (!m_pEnd) m_pEnd = pNew;
-      if (m_pBegin) m_pBegin->pPrev = pNew;
-      m_pBegin = pNew;
-    }
-
-    template <class T>
-    T CDualLinkedList<T>::popFront() {
-      if (!m_pBegin) throw std::runtime_error("List is empty");
-
-      T data = m_pBegin->data;
-      leaf *pTemp = m_pBegin;
-
-      m_pBegin = m_pBegin->pNext;
-      if (m_pBegin)
-        m_pBegin->pPrev = nullptr;
-      else
-        m_pEnd = nullptr;
-
-      delete pTemp;
-      return data;
-    }
-
-    template <class T>
-    void CDualLinkedList<T>::updateAndDeleteLeaf(CIterator &it, leaf *pTemp) {
-      if (pTemp->pPrev)
-        pTemp->pPrev->pNext = pTemp->pNext;
-      else
-        m_pBegin = pTemp->pNext;
-
-      if (pTemp->pNext)
-        pTemp->pNext->pPrev = pTemp->pPrev;
-      else
-        m_pEnd = pTemp->pPrev;
-
-      it.setLeaf(pTemp->pNext);
-      delete pTemp;
-    }
-
-    template <class T>
-    void CDualLinkedList<T>::erase(CIterator &it) {
-      if (!it.isValid()) {
-        throw std::runtime_error("Invalid iterator");
-      }
-
-      leaf *pTemp = it.getLeaf();
-      updateAndDeleteLeaf(it, pTemp);
-      it.setLeaf(pTemp->pPrev);
-    }
-
-    template <class T>
-    void CDualLinkedList<T>::eraseAndNext(CIterator &it) {
-      if (!it.isValid()) {
-        throw std::runtime_error("Invalid iterator");
-      }
-
-      leaf *pTemp = it.getLeaf();
-      it.setLeaf(pTemp->pNext);
-      updateAndDeleteLeaf(it, pTemp);
-    }
-
-    template <class T>
-    int CDualLinkedList<T>::getSize() {
-      int size = 0;
-      leaf *pTemp = m_pBegin;
-      while (pTemp) {
-        ++size;
-        pTemp = pTemp->pNext;
-      }
-      return size;
-    }
-
-    template <class T>
-    void CDualLinkedList<T>::clear() {
-      while (m_pBegin) {
-        leaf *pTemp = m_pBegin;
-        m_pBegin = m_pBegin->pNext;
-        delete pTemp;
-      }
-
-      m_pEnd = nullptr;
-    }
-
-    template <class T>
-    typename CDualLinkedList<T>::CIterator CDualLinkedList<T>::begin() {
-      return CIterator(m_pBegin);
-    }
-
-    template <class T>
-    typename CDualLinkedList<T>::CIterator CDualLinkedList<T>::end() {
-      return CIterator(m_pEnd);
-    }
 
 };      // namespace lab618
 #endif  //#ifndef TEMPLATES_LIST_2022_02_03
