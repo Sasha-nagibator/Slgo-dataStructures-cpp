@@ -184,25 +184,30 @@ class CDualLinkedList {
     }
 
     void operator++() {
-      if (!isValid()) {
-        throw std::runtime_error("Invalid iterator");
-      }
 
-      if (m_pCurrent)
+
+      if (m_pCurrent && m_pCurrent->pNext != nullptr) {
         m_pCurrent = m_pCurrent->pNext;
-      else
+      }
+      else if (m_pCurrent && m_pCurrent->pNext == nullptr) {
+        setLeafPostEnd(m_pCurrent);
+      }
+      else {
         m_pCurrent = m_pBegin;
+      }
     }
 
     void operator--() {
-      if (!isValid()) {
-        throw std::runtime_error("Invalid iterator");
-      }
 
-      if (m_pCurrent)
+      if (m_pCurrent && m_pCurrent->pPrev != nullptr) {
         m_pCurrent = m_pCurrent->pPrev;
-      else
+      }
+      else if (m_pCurrent && m_pCurrent->pPrev == nullptr) {
+        setLeafPreBegin(m_pCurrent);
+      }
+      else {
         m_pCurrent = m_pEnd;
+      }
     }
 
     T &getData() {
@@ -226,15 +231,15 @@ class CDualLinkedList {
     void setLeaf(typename CDualLinkedList<T>::leaf *p) { m_pCurrent = p; }
 
     void setLeafPreBegin(typename CDualLinkedList<T>::leaf *p) {
-      m_pBegin = nullptr;
-      m_pCurrent = nullptr;
-      m_pEnd = p;
-    }
-
-    void setLeafPostEnd(typename CDualLinkedList<T>::leaf *p) {
       m_pBegin = p;
       m_pCurrent = nullptr;
       m_pEnd = nullptr;
+    }
+
+    void setLeafPostEnd(typename CDualLinkedList<T>::leaf *p) {
+      m_pBegin = nullptr;
+      m_pCurrent = nullptr;
+      m_pEnd = p;
     }
 
     bool isValid() { return (m_pCurrent != nullptr); }

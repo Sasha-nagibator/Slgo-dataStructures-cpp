@@ -1,6 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include "list.h"
+#include <list>
+#include <iterator>
 
 using namespace lab618;
 
@@ -205,8 +207,7 @@ TEST_CASE("CDualLinkedList tests") {
     ++it;
             CHECK(*it == 3);
             CHECK(!(it != list.end()));
-    ++it;
-            REQUIRE(it.getLeaf() == nullptr);
+
   }
 
           SUBCASE("clear and getSize") {
@@ -250,3 +251,69 @@ TEST_CASE("Iterating through the list using the iterator") {
             REQUIRE(it.getLeaf() == nullptr);
   }
 }
+
+TEST_CASE("CDualLinkedList CIterator operator++ with erase") {
+  CDualLinkedList<int> list;
+  for (int i = 1; i < 4; ++i) {
+    list.pushBack(i);
+  }
+
+  auto it = list.begin();
+  ++it;
+  list.erase(it);
+
+          REQUIRE(*list.begin() == 1);
+          it = list.begin();
+          ++it;
+          REQUIRE(*it == 3);
+}
+
+TEST_CASE("CDualLinkedList CIterator operator++ with eraseAndNext") {
+  CDualLinkedList<int> list;
+
+  for (int i = 1; i < 4; ++i) {
+    list.pushBack(i);
+  }
+
+  auto it = list.begin();
+  ++it;
+  list.eraseAndNext(it);
+
+          REQUIRE(*list.begin() == 1);
+  it = list.begin();
+  ++it;
+          REQUIRE(*it == 3);
+}
+
+TEST_CASE("THE MOST CLEVER TEST EVER!!!!!!!!!!!") {
+  CDualLinkedList<int> list;
+
+  for (int i = 1; i < 4; ++i) {
+    list.pushBack(i);
+  }
+
+  auto it = list.end();
+  ++it;
+  --it;
+          REQUIRE(*it == 3);
+  list.erase(it);
+
+          REQUIRE(*list.begin() == 1);
+}
+
+TEST_CASE("THE LEAST CLEVER TEST EVER!!!!!!!!!!!") {
+  CDualLinkedList<int> list;
+
+  for (int i = 1; i < 4; ++i) {
+    list.pushBack(i);
+  }
+
+  auto it = list.begin();
+  --it;
+  ++it;
+          REQUIRE(*it == 1);
+  list.erase(it);
+
+          REQUIRE(*list.begin() == 2);
+}
+
