@@ -1,4 +1,4 @@
-﻿#ifndef TEMPLATES_LIST_2023_02_02
+#ifndef TEMPLATES_LIST_2023_02_02
 #define TEMPLATES_LIST_2023_02_02
 
 #include <stdexcept>
@@ -188,8 +188,7 @@ class CDualLinkedList {
 
       if (m_pCurrent && m_pCurrent->pNext != nullptr) {
         m_pCurrent = m_pCurrent->pNext;
-      }
-      else if (m_pCurrent && m_pCurrent->pNext == nullptr) {
+      } else if (m_pCurrent && m_pCurrent->pNext == nullptr) {
         setLeafPostEnd(m_pCurrent);
       }
       else {
@@ -305,45 +304,42 @@ class CDualLinkedList {
   }
 
   void erase(CIterator &it) {
-    if (!it.isValid()) {
-      throw std::runtime_error("Invalid iterator");
-    }
 
     leaf *pTemp = it.getLeaf();
-    if (pTemp->pPrev)
+    if (pTemp->pPrev) {
+      it.setLeaf(pTemp->pPrev);
       pTemp->pPrev->pNext = pTemp->pNext;
-    else
-      m_pBegin = pTemp->pNext;
+      if (pTemp->pNext) {
+        pTemp->pNext->pPrev = pTemp->pPrev;
+      } else {
+        m_pEnd = pTemp->pPrev;
+      }
+      delete pTemp;
+    }
+    else {
+      popFront();
+      it.setLeafPreBegin(m_pBegin);
+    }
 
-    if (pTemp->pNext)
-      pTemp->pNext->pPrev = pTemp->pPrev;
-    else
-      m_pEnd = pTemp->pPrev;
-
-    it.setLeaf(pTemp->pNext);
-    delete pTemp;
-    it.setLeaf(pTemp->pPrev);
   }
 
   void eraseAndNext(CIterator &it) {
-    if (!it.isValid()) {
-      throw std::runtime_error("Invalid iterator");
-    }
 
     leaf *pTemp = it.getLeaf();
-    it.setLeaf(pTemp->pNext);
-    if (pTemp->pPrev)
-      pTemp->pPrev->pNext = pTemp->pNext;
-    else
-      m_pBegin = pTemp->pNext;
-
-    if (pTemp->pNext)
+    if (pTemp->pNext) {
+      it.setLeaf(pTemp->pNext);
       pTemp->pNext->pPrev = pTemp->pPrev;
-    else
-      m_pEnd = pTemp->pPrev;
-
-    it.setLeaf(pTemp->pNext);
-    delete pTemp;
+      if (pTemp->pPrev) {
+        pTemp->pPrev->pNext = pTemp->pNext;
+      } else {
+        m_pBegin = pTemp->pNext;
+      }
+      delete pTemp;
+    }
+    else {
+      popBack();
+      it.setLeafPostEnd(m_pEnd);
+    }
   }
 
   int getSize() {

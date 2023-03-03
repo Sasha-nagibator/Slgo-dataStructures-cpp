@@ -2,7 +2,6 @@
 #include <doctest/doctest.h>
 #include "list.h"
 #include <list>
-#include <iterator>
 
 using namespace lab618;
 
@@ -285,7 +284,7 @@ TEST_CASE("CDualLinkedList CIterator operator++ with eraseAndNext") {
           REQUIRE(*it == 3);
 }
 
-TEST_CASE("THE MOST CLEVER TEST EVER!!!!!!!!!!!") {
+TEST_CASE("Iterating after the end of list and then returning") {
   CDualLinkedList<int> list;
 
   for (int i = 1; i < 4; ++i) {
@@ -301,7 +300,7 @@ TEST_CASE("THE MOST CLEVER TEST EVER!!!!!!!!!!!") {
           REQUIRE(*list.begin() == 1);
 }
 
-TEST_CASE("THE LEAST CLEVER TEST EVER!!!!!!!!!!!") {
+TEST_CASE("Iterating before the start of list and then returning") {
   CDualLinkedList<int> list;
 
   for (int i = 1; i < 4; ++i) {
@@ -315,5 +314,47 @@ TEST_CASE("THE LEAST CLEVER TEST EVER!!!!!!!!!!!") {
   list.erase(it);
 
           REQUIRE(*list.begin() == 2);
+}
+
+
+TEST_CASE("SetLeafPreBegin when erasig from beginning") {
+  CDualLinkedList<int> list;
+
+  for (int i = 1; i < 4; ++i) {
+    list.pushBack(i);
+  }
+  auto it = list.begin();
+  list.erase(it);
+  ++it;
+          REQUIRE(*it == 2);
+}
+
+TEST_CASE("SetLeafPostEnd when eraseAndNext from the end") {
+  CDualLinkedList<int> list;
+
+  for (int i = 1; i < 4; ++i) {
+    list.pushBack(i);
+  }
+  auto it = list.end();
+  list.eraseAndNext(it);
+   --it;
+
+  REQUIRE(*it == 2);
+
+
+}
+
+TEST_CASE("Ziyo test") {
+  CDualLinkedList<int> list;
+
+  for(int i = 0; i < 10; i++) {
+    list.pushFront(i);
+  }
+  int i = 10;
+  for(typename CDualLinkedList<int>::CIterator it = list.end(); it.isValid(); --it) {
+    list.eraseAndNext(it);
+    REQUIRE(!it.isValid());
+  }
+
 }
 
