@@ -14,8 +14,9 @@ struct test_item {
     int num = 4711;
 };
 
-void createObjects(bool isDeleteElementsOnDestruct) {
-  CMemoryManager<test_item> mm(31, isDeleteElementsOnDestruct);
+
+void createObjects(bool isDeleteElementsOnDestruct, bool deleteSomeObjects) {
+  CMemoryManager<test_item> mm(7, isDeleteElementsOnDestruct);
   std::vector<test_item *> objs;
   for (int i = 0; i < 1234; ++i) {
     test_item *obj = mm.newObject();
@@ -29,8 +30,46 @@ void createObjects(bool isDeleteElementsOnDestruct) {
     CHECK(objs[i]->str == std::to_string(i - 100));
 
   }
-  for (int i = 0; i < 1233; ++i) {
-    mm.deleteObject(objs[i]);
+  if (deleteSomeObjects) {
+    for (int i = 0; i < 1234; ++i) {
+      if (i % 3) {
+        mm.deleteObject(objs[i]);
+      }
+    }
+  }
+}
+
+
+void f() {
+  CMemoryManager<test_item> mm(7);
+  std::vector<test_item *> objs;
+  for (int i = 0; i < 1234; ++i) {
+    test_item *obj = mm.newObject();
+    obj->num = i;
+
+    obj->str = std::to_string(i - 100);
+    objs.push_back(obj);
+  }
+  for (int i = 33; i < 1155; ++i) {
+    CHECK(objs[i]->num == i);
+    CHECK(objs[i]->str == std::to_string(i - 100));
+  }
+}
+
+TEST_CASE("Clear") {
+  SUBCASE("isDeleteElementsOnDestruct == true and some elements are deleted" ) {
+    bool deleteSomeObjects = true;
+    CHECK_NOTHROW(createObjects(true, deleteSomeObjects));
+  }
+  SUBCASE("isDeleteElementsOnDestruct == true and all elements are not deleted" ) {
+    bool deleteSomeObjects = false;
+    CHECK_NOTHROW(createObjects(true, deleteSomeObjects));
+  }
+
+  SUBCASE("isDeleteElementsOnDestruct == false") {
+    CHECK_THROWS_AS(createObjects(false, true), lab618::CMemoryManager<test_item>::CException);
+    CHECK_THROWS_AS(createObjects(false, false), lab618::CMemoryManager<test_item>::CException);
+    CHECK_THROWS_AS(f(), lab618::CMemoryManager<test_item>::CException);
   }
 }
 
@@ -88,37 +127,6 @@ TEST_CASE("newObject") {
   }
 }
 
-void f() {
-  CMemoryManager<test_item> mm(31);
-  std::vector<test_item *> objs;
-  for (int i = 0; i < 1234; ++i) {
-    test_item *obj = mm.newObject();
-    obj->num = i;
-
-    obj->str = std::to_string(i - 100);
-    objs.push_back(obj);
-  }
-  for (int i = 33; i < 1155; ++i) {
-    CHECK(objs[i]->num == i);
-    CHECK(objs[i]->str == std::to_string(i - 100));
-
-  }
-  for (int i = 0; i < 1233; ++i) { // последний элемент не удалится
-    mm.deleteObject(objs[i]);
-  }
-
-}
-
-TEST_CASE("Clear") {
-  SUBCASE("isDeleteElementsOnDestruct == true") {
-    CHECK_NOTHROW(createObjects(true));
-  }
-  SUBCASE("isDeleteElementsOnDestruct == false") {
-    CHECK_THROWS_AS(createObjects(false), lab618::CMemoryManager<test_item>::CException);
-    CHECK_THROWS_AS(f(), lab618::CMemoryManager<test_item>::CException);
-  }
-}
-
 
 
 TEST_CASE("Check time") {
@@ -126,6 +134,3 @@ TEST_CASE("Check time") {
   checkTime(100000);
   checkTime(10000000);
 }
-
-
-

@@ -93,9 +93,10 @@ class CMemoryManager {
         --blk->usedCount;
         auto current = p;
         auto start = blk->pdata;
-        if (blk->firstFreeIndex > current - start) {
-          blk->firstFreeIndex = current - start;
-        }
+        blk->firstFreeIndex = current - start;
+        // if (blk->firstFreeIndex > current - start || blk->firstFreeIndex == NO_FREE_CELL_INDICATOR) {
+        //  blk->firstFreeIndex = current - start;
+        // }
         return true;
       }
       blk = blk->pnext;
@@ -149,10 +150,22 @@ class CMemoryManager {
 
   // Освободить память блока данных. Применяется в clear
   void deleteBlock(block* p) {
-    if (p == nullptr) {
-      return;
+    if (m_isDeleteElementsOnDestruct) {
+      bool* emptyMask = new bool[m_blkSize];
+      std::memset(emptyMask, 0, m_blkSize * sizeof(bool));
+      while (p->firstFreeIndex != NO_FREE_CELL_INDICATOR) {
+        emptyMask[p->firstFreeIndex] = 1;
+        p->firstFreeIndex = *reinterpret_cast<uint32_t *>(p->pdata + p->firstFreeIndex);
+      }
+      for (int i = 0; p->usedCount > 0 && i < m_blkSize; ++i) {
+        if (!emptyMask[i]) {
+          p->pdata[i].~T();
+          --p->usedCount;
+        }
+      }
+      delete[] emptyMask;
     }
-    delete[] reinterpret_cast<char *>(p->pdata);
+    delete[] reinterpret_cast<char*>(p->pdata);
     delete p;
     p = nullptr;
   }
