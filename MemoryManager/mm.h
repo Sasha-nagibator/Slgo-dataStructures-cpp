@@ -3,6 +3,7 @@
 
 #define NO_FREE_CELL_INDICATOR 0xFFFFFFFF
 
+
 namespace lab618 {
 template <class T>
 class CMemoryManager {
