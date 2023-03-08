@@ -107,11 +107,13 @@ class CMemoryManager {
   // Очистка данных, зависит от m_isDeleteElementsOnDestruct
   void clear() {
     if (m_isDeleteElementsOnDestruct) {
+      bool* emptyMask = new bool[m_blkSize];
       while (m_pBlocks != nullptr) {
         block *tmp = m_pBlocks;
         m_pBlocks = m_pBlocks->pnext;
-        deleteBlock(tmp);
+        deleteBlock(tmp, emptyMask);
       }
+      delete[] emptyMask;
     } else {
       for (block *it = m_pBlocks; it != nullptr; it = it->pnext) {
         if (it->usedCount) {
@@ -135,35 +137,31 @@ class CMemoryManager {
     p->pnext = nullptr;
     p->firstFreeIndex = 0;
     p->usedCount = 0;
+
     if (m_pBlocks == nullptr) {
       m_pBlocks = m_pCurrentBlk = p;
     } else {
-      block *blk = m_pBlocks;
-      while (blk->pnext) {
-        blk = blk->pnext;
-      }
-      blk->pnext = p;
+      p->pnext = m_pBlocks;
+      m_pBlocks = p;
     }
 
     return p;
   }
 
   // Освободить память блока данных. Применяется в clear
-  void deleteBlock(block* p) {
+  void deleteBlock(block* p, bool* emptyMask) {
     if (m_isDeleteElementsOnDestruct) {
-      bool* emptyMask = new bool[m_blkSize];
+
       std::memset(emptyMask, 0, m_blkSize * sizeof(bool));
       while (p->firstFreeIndex != NO_FREE_CELL_INDICATOR) {
         emptyMask[p->firstFreeIndex] = 1;
         p->firstFreeIndex = *reinterpret_cast<uint32_t *>(p->pdata + p->firstFreeIndex);
       }
-      for (int i = 0; p->usedCount > 0 && i < m_blkSize; ++i) {
+      for (int i = 0; i < m_blkSize; ++i) {
         if (!emptyMask[i]) {
           p->pdata[i].~T();
-          --p->usedCount;
         }
       }
-      delete[] emptyMask;
     }
     delete[] reinterpret_cast<char*>(p->pdata);
     delete p;
