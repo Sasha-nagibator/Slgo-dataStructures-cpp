@@ -9,7 +9,7 @@ struct IntContainer {
 
     IntContainer(int size) : size_(size), data_(new int[size_]) {}
 
-
+    // Destructor
     ~IntContainer() {
       delete[] data_;
     }
@@ -54,6 +54,7 @@ struct IntContainer {
 
 
 int compareT(const IntContainer *ic0, const IntContainer *ic1) {
+
   return ic0->size_ - ic1->size_;
 }
 
@@ -103,6 +104,13 @@ void templates::heapSort(void **ppArray, int length, templates::CompareSortType 
 // merge sort
 
 void templates::mergeSort(void **ppArray, int length, templates::CompareSortType *pCompareFunc) {
+  void **tempArray = new void *[length];
+  mergeSortHelper(ppArray, tempArray, length, pCompareFunc);
+  delete[] tempArray;
+}
+
+
+void templates::mergeSortHelper(void **ppArray, void **tempArray, int length, templates::CompareSortType *pCompareFunc) {
   if (length == 1) {
     return;
   }
@@ -111,36 +119,33 @@ void templates::mergeSort(void **ppArray, int length, templates::CompareSortType
   void **left = ppArray;
   void **right = ppArray + half;
 
-  mergeSort(left, half, pCompareFunc);
-  mergeSort(right, length - half, pCompareFunc);
-
-  void **tmp = new void *[length];
+  mergeSortHelper(left, tempArray, half, pCompareFunc);
+  mergeSortHelper(right, tempArray + half, length - half, pCompareFunc);
 
   for (int i = 0, j = 0; i + j < length;) {
     if (i == half) {
-      tmp[i + j] = right[j];
+      tempArray[i + j] = right[j];
       ++j;
     } else if (j == length - half) {
-      tmp[i + j] = left[i];
+      tempArray[i + j] = left[i];
       ++i;
     } else if (pCompareFunc(left[i], right[j]) > 0) {
-      tmp[i + j] = left[i];
+      tempArray[i + j] = left[i];
       ++i;
     } else {
-      tmp[i + j] = right[j];
+      tempArray[i + j] = right[j];
       ++j;
     }
   }
 
   for (int i = 0; i < length; ++i) {
-    ppArray[i] = tmp[i];
+    ppArray[i] = tempArray[i];
   }
 
-  delete[] tmp;
+
 }
 
 int main() {
-/*
   int len = 15;
   IntContainer** test_arr = new IntContainer*[len];
   std::cout << "merge sort test" << std::endl;
@@ -185,5 +190,4 @@ int main() {
     delete test_arr[i];
   }
   delete[] test_arr;
-*/
 }

@@ -26,6 +26,9 @@ namespace templates
     {
         heapSort(reinterpret_cast<void**>(ppArray), length, (CompareSortType*)pCompareFunc);
     }
+
+    void mergeSortHelper(void **ppArray, void **tempArray, int length, CompareSortType pCompareFunc);
 }; // namespace templates
 
 #endif // #define SORT_HEAD_H_2023_03_15
+
