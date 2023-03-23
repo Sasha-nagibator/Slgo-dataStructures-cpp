@@ -146,6 +146,7 @@ void templates::mergeSort(void **ppArray, int length, templates::CompareSortType
 }
 
 int main() {
+/*
   int len = 15;
   IntContainer** test_arr = new IntContainer*[len];
   std::cout << "merge sort test" << std::endl;
@@ -190,4 +191,5 @@ int main() {
     delete test_arr[i];
   }
   delete[] test_arr;
+  */
 }
