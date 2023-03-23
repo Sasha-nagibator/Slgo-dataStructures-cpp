@@ -54,13 +54,7 @@ struct IntContainer {
 
 
 int compareT(const IntContainer *ic0, const IntContainer *ic1) {
-  if (ic0->size_ > ic1->size_) {
-    return 1;
-  }
-  else if (ic0->size_ == ic1->size_) {
-    return 0;
-  }
-  return -1;
+  return ic0->size_ - ic1->size_;
 }
 
 int compareV(const void *first, const void *second) {
@@ -191,5 +185,5 @@ int main() {
     delete test_arr[i];
   }
   delete[] test_arr;
-  */
+*/
 }

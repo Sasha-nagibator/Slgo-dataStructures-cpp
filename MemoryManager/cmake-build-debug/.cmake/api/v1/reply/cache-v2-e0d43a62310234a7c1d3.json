@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/aleksandr/Documents/6sem/baza/Algo-DataStructures/Algo-DataStructures/MemoryManager/cmake-build-debug"
+			"value" : "/home/aleksandr/Documents/6sem/baza/matvey24mar/Algo-DataStructures/MemoryManager/cmake-build-debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -679,7 +679,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/aleksandr/Documents/6sem/baza/Algo-DataStructures/Algo-DataStructures/MemoryManager"
+			"value" : "/home/aleksandr/Documents/6sem/baza/matvey24mar/Algo-DataStructures/MemoryManager"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -1215,7 +1215,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/aleksandr/Documents/6sem/baza/Algo-DataStructures/Algo-DataStructures/MemoryManager/cmake-build-debug"
+			"value" : "/home/aleksandr/Documents/6sem/baza/matvey24mar/Algo-DataStructures/MemoryManager/cmake-build-debug"
 		},
 		{
 			"name" : "MemoryManager_IS_TOP_LEVEL",
@@ -1239,7 +1239,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/aleksandr/Documents/6sem/baza/Algo-DataStructures/Algo-DataStructures/MemoryManager"
+			"value" : "/home/aleksandr/Documents/6sem/baza/matvey24mar/Algo-DataStructures/MemoryManager"
 		},
 		{
 			"name" : "ProcessorCount_cmd_nproc",

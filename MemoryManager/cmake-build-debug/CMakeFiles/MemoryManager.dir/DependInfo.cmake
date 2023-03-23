@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/aleksandr/Documents/6sem/baza/Algo-DataStructures/Algo-DataStructures/MemoryManager/test.cpp" "CMakeFiles/MemoryManager.dir/test.cpp.o" "gcc" "CMakeFiles/MemoryManager.dir/test.cpp.o.d"
+  "/home/aleksandr/Documents/6sem/baza/matvey24mar/Algo-DataStructures/MemoryManager/test.cpp" "CMakeFiles/MemoryManager.dir/test.cpp.o" "gcc" "CMakeFiles/MemoryManager.dir/test.cpp.o.d"
   )
 
 # Targets to which this target links.
