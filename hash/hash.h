@@ -149,8 +149,10 @@ namespace lab618
         */
         bool remove(const T& element)
         {
-          unsigned int idx;
-          leaf *foundLeaf = findLeaf(const_cast<T*>(&element), idx);
+          unsigned int hash = HashFunc(const_cast<T*>(&element));
+          unsigned int idx = hash % m_tableSize;
+
+          leaf *foundLeaf = m_pTable[idx];
 
           if (foundLeaf == nullptr)
           {
