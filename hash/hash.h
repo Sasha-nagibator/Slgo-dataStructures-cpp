@@ -131,8 +131,10 @@ namespace lab618
         Обратите внимание, что для поиска используется частично заполненный объект, т.е. В нем должны быть заполнены поля на основе которых рассчитывается хеш.*/
         T* find(const T& element)
         {
-          unsigned int idx;
-          leaf *foundLeaf = findLeaf(const_cast<T*>(&element), idx);
+          unsigned int hash = HashFunc(const_cast<T*>(&element));
+          unsigned int idx = hash % m_tableSize;
+
+          leaf *foundLeaf = m_pTable[idx];
 
           if (foundLeaf != nullptr)
           {
@@ -182,19 +184,11 @@ namespace lab618
         /**
         Удаление всех элементов. Можно вызвать в деструкторе
         */
-        void clear()
-        {
-          for (int i = 0; i < m_tableSize; ++i)
-          {
-            leaf *curLeaf = m_pTable[i];
-            while (curLeaf != nullptr)
-            {
-              leaf *nextLeaf = curLeaf->pnext;
-              m_Memory.deleteObject(curLeaf);
-              curLeaf = nextLeaf;
-            }
+        void clear() {
+          for (int i = 0; i < m_tableSize; ++i) {
             m_pTable[i] = nullptr;
           }
+          m_Memory.clear();
         }
     private:
         /**

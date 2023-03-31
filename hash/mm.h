@@ -48,7 +48,7 @@ namespace lab618 {
           isDeleteElementsOnDestruct - уничтожать елементы в деструкторе менеджера или
           проверять на наличие неосвобожденных функцией deleteObject элементов.
         */
-        CMemoryManager(int _default_block_size, bool isDeleteElementsOnDestruct = false) : m_blkSize(_default_block_size),
+        CMemoryManager(int _default_block_size, bool isDeleteElementsOnDestruct = true) : m_blkSize(_default_block_size),
                                                                                            m_pBlocks(nullptr), m_pCurrentBlk(nullptr), m_isDeleteElementsOnDestruct(isDeleteElementsOnDestruct)
         {}
 
@@ -71,13 +71,9 @@ namespace lab618 {
           }
 
           T* currIndex = nullptr;
-          if (m_pCurrentBlk->firstFreeIndex == 0) {
-            currIndex = m_pCurrentBlk->pdata;
-            ++m_pCurrentBlk->firstFreeIndex;
-          } else {
-            currIndex = m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex;
-            m_pCurrentBlk->firstFreeIndex = *reinterpret_cast<uint32_t *>(currIndex);
-          }
+
+          currIndex = m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex;
+          m_pCurrentBlk->firstFreeIndex = *reinterpret_cast<uint32_t *>(currIndex);
 
           ++m_pCurrentBlk->usedCount;
           ConstructElements(currIndex);
