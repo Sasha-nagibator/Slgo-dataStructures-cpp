@@ -131,10 +131,8 @@ namespace lab618
         Обратите внимание, что для поиска используется частично заполненный объект, т.е. В нем должны быть заполнены поля на основе которых рассчитывается хеш.*/
         T* find(const T& element)
         {
-          unsigned int hash = HashFunc(const_cast<T*>(&element));
-          unsigned int idx = hash % m_tableSize;
-
-          leaf *foundLeaf = m_pTable[idx];
+          unsigned int idx;
+          leaf *foundLeaf = findLeaf(const_cast<T*>(&element), idx);
 
           if (foundLeaf != nullptr)
           {
