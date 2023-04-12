@@ -14,7 +14,7 @@ namespace lab618
             T* pData;
             leaf *pLeft;
             leaf *pRight;
-            int balanceFactor;
+            int diff;  // difference in height
         };
 
     public:
@@ -72,6 +72,45 @@ namespace lab618
         leaf* m_pRoot;
         CMemoryManager<leaf> m_Memory;
 
+        // Utility function to update height of a node
+        void updateHeight(leaf *pNode) {
+          int heightLeft = pNode->pLeft ? pNode->pLeft->diff + 1 : 0;
+          int heightRight = pNode->pRight ? pNode->pRight->diff + 1 : 0;
+          pNode->diff = heightLeft - heightRight;
+        }
+
+        void rotateLeft(leaf*& pNode)
+        {
+          leaf* pRight = pNode->pRight;
+          pNode->pRight = pRight->pLeft;
+          pRight->pLeft = pNode;
+          updateHeight(pNode);
+          updateHeight(pRight);
+          pNode = pRight;
+        }
+
+        void rotateRight(leaf*& pNode)
+        {
+          leaf* pLeft = pNode->pLeft;
+          pNode->pLeft = pLeft->pRight;
+          pLeft->pRight = pNode;
+          updateHeight(pNode);
+          updateHeight(pLeft);
+          pNode = pLeft;
+        }
+
+        void bigRotateLeft(leaf*& pNode)
+        {
+          rotateRight(pNode->pRight);
+          rotateLeft(pNode);
+        }
+
+        void bigRotateRight(leaf*& pNode)
+        {
+          rotateLeft(pNode->pLeft);
+          rotateRight(pNode);
+        }
+
         bool addRecursively(leaf*& pNode, T* pElement)
         {
           if (pNode == nullptr)
@@ -79,7 +118,7 @@ namespace lab618
             pNode = m_Memory.newObject();
             pNode->pData = pElement;
             pNode->pLeft = pNode->pRight = nullptr;
-            pNode->balanceFactor = 0;
+            pNode->diff = 0;
             return true;
           }
 
@@ -93,24 +132,16 @@ namespace lab618
           if (compResult < 0)
           {
             isHeightIncreased = addRecursively(pNode->pLeft, pElement);
-            if (isHeightIncreased)
-            {
-              pNode->balanceFactor--;
-            }
           }
           else
           {
             isHeightIncreased = addRecursively(pNode->pRight, pElement);
-            if (isHeightIncreased)
-            {
-              pNode->balanceFactor++;
-            }
           }
 
-          if (isHeightIncreased && (pNode->balanceFactor == -2 || pNode->balanceFactor == 2))
+          if (isHeightIncreased)
           {
+            updateHeight(pNode);
             balanceNode(pNode);
-            isHeightIncreased = false;
           }
 
           return isHeightIncreased;
@@ -161,7 +192,13 @@ namespace lab618
           bool isHeightDecreased = false;
           if (compResult == 0)
           {
-            if (pNode->pLeft == nullptr || pNode->pRight == nullptr)
+            if (pNode->pLeft == nullptr && pNode->pRight == nullptr)
+            {
+              m_Memory.deleteObject(pNode);
+              pNode = nullptr;
+              isHeightDecreased = true;
+            }
+            else if (pNode->pLeft == nullptr || pNode->pRight == nullptr)
             {
               leaf* pTemp = (pNode->pLeft != nullptr) ? pNode->pLeft : pNode->pRight;
               m_Memory.deleteObject(pNode);
@@ -175,7 +212,7 @@ namespace lab618
               isHeightDecreased = removeRecursively(pNode->pRight, *pMinNode->pData);
               if (isHeightDecreased)
               {
-                pNode->balanceFactor--;
+                pNode->diff--;
               }
             }
           }
@@ -184,7 +221,7 @@ namespace lab618
             isHeightDecreased = removeRecursively(pNode->pLeft, element);
             if (isHeightDecreased)
             {
-              pNode->balanceFactor++;
+              pNode->diff++;
             }
           }
           else
@@ -192,17 +229,44 @@ namespace lab618
             isHeightDecreased = removeRecursively(pNode->pRight, element);
             if (isHeightDecreased)
             {
-              pNode->balanceFactor--;
+              pNode->diff--;
             }
           }
 
-          if (isHeightDecreased && (pNode == nullptr || pNode->balanceFactor == -2 || pNode->balanceFactor == 2))
+          if (isHeightDecreased && pNode != nullptr)
           {
+            updateHeight(pNode);
             balanceNode(pNode);
-            isHeightDecreased = (pNode->balanceFactor == 0);
           }
 
           return isHeightDecreased;
+        }
+
+
+        void balanceNode(leaf*& pNode)
+        {
+          if (pNode->diff == -2)
+          {
+            if (pNode->pRight != nullptr && pNode->pRight->diff <= 0)
+            {
+              rotateLeft(pNode);
+            }
+            else
+            {
+              bigRotateLeft(pNode);
+            }
+          }
+          else if (pNode->diff == 2)
+          {
+            if (pNode->pLeft != nullptr && pNode->pLeft->diff >= 0)
+            {
+              rotateRight(pNode);
+            }
+            else
+            {
+              bigRotateRight(pNode);
+            }
+          }
         }
 
         leaf* findMinNode(leaf* pNode)
@@ -212,61 +276,6 @@ namespace lab618
             pNode = pNode->pLeft;
           }
           return pNode;
-        }
-
-        void rotateLeft(leaf*& pNode)
-        {
-          if (pNode == nullptr || pNode->pRight == nullptr)
-          {
-            return;
-          }
-
-          leaf* pRight = pNode->pRight;
-          pNode->pRight = pRight->pLeft;
-          pRight->pLeft = pNode;
-          pNode = pRight;
-        }
-
-        void rotateRight(leaf*& pNode)
-        {
-          if (pNode == nullptr || pNode->pLeft == nullptr)
-          {
-            return;
-          }
-
-          leaf* pLeft = pNode->pLeft;
-          pNode->pLeft = pLeft->pRight;
-          pLeft->pRight = pNode;
-          pNode = pLeft;
-        }
-
-        void balanceNode(leaf*& pNode)
-        {
-          if (pNode->balanceFactor == 2)
-          {
-            if (pNode->pRight != nullptr && pNode->pRight->balanceFactor < 0)
-            {
-              rotateRight(pNode->pRight);
-            }
-            rotateLeft(pNode);
-          }
-          else if (pNode->balanceFactor == -2)
-          {
-            if (pNode->pLeft != nullptr && pNode->pLeft->balanceFactor > 0)
-            {
-              rotateLeft(pNode->pLeft);
-            }
-            rotateRight(pNode);
-          }
-
-          if (pNode->balanceFactor == 1 || pNode->balanceFactor == -1)
-          {
-            pNode->balanceFactor = 0;
-          }
-          else
-          {
-            pNode->balanceFactor = (pNode->balanceFactor > 0) ? pNode->balanceFactor - 1 : pNode->balanceFactor + 1;
-          }
         }
 
     };
