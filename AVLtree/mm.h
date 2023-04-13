@@ -107,22 +107,18 @@ class CMemoryManager {
 
   // Очистка данных, зависит от m_isDeleteElementsOnDestruct
   void clear() {
-    if (m_isDeleteElementsOnDestruct) {
+
       bool* emptyMask = new bool[m_blkSize];
       while (m_pBlocks != nullptr) {
         block *tmp = m_pBlocks;
+        if (m_isDeleteElementsOnDestruct && tmp->usedCount) {
+          throw CException();
+        }
         m_pBlocks = m_pBlocks->pnext;
         deleteBlock(tmp, emptyMask);
       }
       delete[] emptyMask;
-    } else {
-      for (block *it = m_pBlocks; it != nullptr; it = it->pnext) {
-        if (it->usedCount) {
-          throw CException();
-        }
-      }
-    }
-    m_pBlocks = nullptr;
+      m_pBlocks = nullptr;
   }
 
  private:
