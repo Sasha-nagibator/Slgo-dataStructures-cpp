@@ -1,0 +1,3 @@
+/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/MemoryManager/cmake-build-debug/CMakeFiles/MemoryManager.dir
+/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/MemoryManager/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/MemoryManager/cmake-build-debug/CMakeFiles/rebuild_cache.dir

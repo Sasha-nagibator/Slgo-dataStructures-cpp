@@ -72,7 +72,7 @@ namespace lab618
         CHash(int hashTableSize, int defaultBlockSize)
                 : m_tableSize(hashTableSize),
                   m_pTable(new leaf*[hashTableSize]),
-                  m_Memory(defaultBlockSize)
+                  m_Memory(CMemoryManager<leaf>(defaultBlockSize, true))
         {
           for (int i = 0; i < hashTableSize; ++i)
           {
@@ -85,7 +85,7 @@ namespace lab618
         virtual ~CHash()
         {
           clear();
-          delete[] m_pTable;
+
         }
 
         /**
@@ -185,10 +185,9 @@ namespace lab618
         Удаление всех элементов. Можно вызвать в деструкторе
         */
         void clear() {
-          for (int i = 0; i < m_tableSize; ++i) {
-            m_pTable[i] = nullptr;
-          }
           m_Memory.clear();
+          delete[] m_pTable;
+          m_pTable = nullptr;
         }
     private:
         /**
@@ -205,6 +204,13 @@ namespace lab618
         {
           unsigned int hash = HashFunc(pElement);
           idx = hash % m_tableSize;
+          if (m_pTable == nullptr) {
+            m_pTable = new leaf* [m_tableSize];
+            for (int i = 0; i < m_tableSize; ++i)
+            {
+              m_pTable[i] = nullptr;
+            }
+          }
           leaf *curLeaf = m_pTable[idx];
 
           while (curLeaf != nullptr)

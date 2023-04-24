@@ -3,4 +3,4 @@ project(MemoryManager)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(MemoryManager test.cpp mm.h hash.h)
+add_executable(MemoryManager test.cpp mm.h)

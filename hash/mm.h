@@ -1,10 +1,11 @@
 #ifndef MEMORY_MANAGER_HEAD_H_2023_02_10
 #define MEMORY_MANAGER_HEAD_H_2023_02_10
 
+
+#include <unordered_set>
+
 #define NO_FREE_CELL_INDICATOR 0xFFFFFFFF
 
-#include <cstring>
-#include <stdexcept>
 
 namespace lab618 {
     template <class T>
@@ -48,7 +49,7 @@ namespace lab618 {
           isDeleteElementsOnDestruct - уничтожать елементы в деструкторе менеджера или
           проверять на наличие неосвобожденных функцией deleteObject элементов.
         */
-        CMemoryManager(int _default_block_size, bool isDeleteElementsOnDestruct = true) : m_blkSize(_default_block_size),
+        CMemoryManager(int _default_block_size, bool isDeleteElementsOnDestruct = false) : m_blkSize(_default_block_size),
                                                                                            m_pBlocks(nullptr), m_pCurrentBlk(nullptr), m_isDeleteElementsOnDestruct(isDeleteElementsOnDestruct)
         {}
 
@@ -71,9 +72,13 @@ namespace lab618 {
           }
 
           T* currIndex = nullptr;
-
-          currIndex = m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex;
-          m_pCurrentBlk->firstFreeIndex = *reinterpret_cast<uint32_t *>(currIndex);
+          if (m_pCurrentBlk->firstFreeIndex == 0) {
+            currIndex = m_pCurrentBlk->pdata;
+            ++m_pCurrentBlk->firstFreeIndex;
+          } else {
+            currIndex = m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex;
+            m_pCurrentBlk->firstFreeIndex = *reinterpret_cast<uint32_t *>(currIndex);
+          }
 
           ++m_pCurrentBlk->usedCount;
           ConstructElements(currIndex);
@@ -104,22 +109,19 @@ namespace lab618 {
 
         // Очистка данных, зависит от m_isDeleteElementsOnDestruct
         void clear() {
-          if (m_isDeleteElementsOnDestruct) {
-            bool* emptyMask = new bool[m_blkSize];
-            while (m_pBlocks != nullptr) {
-              block *tmp = m_pBlocks;
-              m_pBlocks = m_pBlocks->pnext;
-              deleteBlock(tmp, emptyMask);
+
+          bool* emptyMask = new bool[m_blkSize];
+          while (m_pBlocks != nullptr) {
+            block *tmp = m_pBlocks;
+            if (!m_isDeleteElementsOnDestruct && tmp->usedCount) {
+              throw CException();
             }
-            delete[] emptyMask;
-          } else {
-            for (block *it = m_pBlocks; it != nullptr; it = it->pnext) {
-              if (it->usedCount) {
-                throw CException();
-              }
-            }
+            m_pBlocks = m_pBlocks->pnext;
+            deleteBlock(tmp, emptyMask);
           }
+          delete[] emptyMask;
           m_pBlocks = nullptr;
+          m_pCurrentBlk = nullptr;
         }
 
     private:

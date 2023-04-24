@@ -2,6 +2,8 @@
 #define MEMORY_MANAGER_HEAD_H_2023_02_10
 
 
+#include <unordered_set>
+
 #define NO_FREE_CELL_INDICATOR 0xFFFFFFFF
 
 
