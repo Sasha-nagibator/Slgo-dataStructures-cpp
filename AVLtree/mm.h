@@ -1,17 +1,22 @@
 #ifndef MEMORY_MANAGER_HEAD_H_2023_02_10
 #define MEMORY_MANAGER_HEAD_H_2023_02_10
 
-
+#include <iostream>
+#include <cstring>
 #include <unordered_set>
 
 #define NO_FREE_CELL_INDICATOR 0xFFFFFFFF
 
-
 namespace lab618 {
-    template <class T>
+
+    template<class T>
     class CMemoryManager {
     private:
         struct block {
+            block(T *pdata) : pdata(pdata) {
+                firstFreeIndex = 0;
+                usedCount = 0;
+            }
             // Массив данных блока
             T* pdata;
             // Адрес следующего блока
@@ -23,13 +28,13 @@ namespace lab618 {
         };
 
         inline void ConstructElements(T* pElement) {
-          memset(reinterpret_cast<void*>(pElement), 0, sizeof(T));
-          ::new (reinterpret_cast<void*>(pElement)) T();
+            memset(reinterpret_cast<void*>(pElement), 0, sizeof(T));
+            ::new (reinterpret_cast<void*>(pElement)) T();
         }
 
         inline void DestructElements(T* pElement) {
-          pElement->~T();
-          memset(reinterpret_cast<void*>(pElement), 0, sizeof(T));
+            pElement->~T();
+            memset(reinterpret_cast<void*>(pElement), 0, sizeof(T));
         }
 
     public:
@@ -39,7 +44,7 @@ namespace lab618 {
             CException() noexcept {}
             virtual const char* what() const noexcept override
             {
-              return "Not all elements have been deleted before calling clear()";
+                return "Not all elements have been deleted before calling clear()";
             }
         };
 
@@ -53,119 +58,111 @@ namespace lab618 {
                                                                                            m_pBlocks(nullptr), m_pCurrentBlk(nullptr), m_isDeleteElementsOnDestruct(isDeleteElementsOnDestruct)
         {}
 
-        virtual ~CMemoryManager() noexcept(false) {
-          clear();
+        virtual ~CMemoryManager() {
+            clear();
         }
 
         // Получить адрес нового элемента из менеджера
-        T* newObject() {
-          if (m_pCurrentBlk == nullptr) {
-            m_pCurrentBlk = newBlock();
-          } else if (m_pCurrentBlk->firstFreeIndex == NO_FREE_CELL_INDICATOR) {
-            m_pCurrentBlk = m_pBlocks;
-            while (m_pCurrentBlk && m_pCurrentBlk->firstFreeIndex == NO_FREE_CELL_INDICATOR) {
-              m_pCurrentBlk = m_pCurrentBlk->pnext;
-            }
+        T *newObject() {
             if (m_pCurrentBlk == nullptr) {
-              m_pCurrentBlk = newBlock();
+                block *new_block = newBlock();
+                new_block->pnext = m_pBlocks;
+                m_pBlocks = new_block;
+                m_pCurrentBlk = new_block;
             }
-          }
-
-          T* currIndex = nullptr;
-          if (m_pCurrentBlk->firstFreeIndex == 0) {
-            currIndex = m_pCurrentBlk->pdata;
-            ++m_pCurrentBlk->firstFreeIndex;
-          } else {
-            currIndex = m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex;
-            m_pCurrentBlk->firstFreeIndex = *reinterpret_cast<uint32_t *>(currIndex);
-          }
-
-          ++m_pCurrentBlk->usedCount;
-          ConstructElements(currIndex);
-          return currIndex;
+            if (m_pCurrentBlk->usedCount == m_blkSize) {
+                m_pCurrentBlk = m_pBlocks;
+                bool flag = false;
+                while (m_pCurrentBlk->usedCount == m_blkSize) {
+                    flag = true;
+                    m_pCurrentBlk = m_pCurrentBlk->pnext;
+                    break;
+                }
+                if (flag) {
+                    block *new_block = newBlock();
+                    new_block->pnext = m_pBlocks;
+                    m_pBlocks = new_block;
+                    m_pCurrentBlk = new_block;
+                }
+            }
+            int free = m_pCurrentBlk->firstFreeIndex;
+            int next_free = *reinterpret_cast<int *>(m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex);
+            memset(reinterpret_cast<void *>((m_pCurrentBlk->pdata + free)), 0, sizeof(T));
+            m_pCurrentBlk->firstFreeIndex = next_free;
+            ++m_pCurrentBlk->usedCount;
+            T *obj = new((m_pCurrentBlk->pdata + free)) T();
+            return obj;
         }
 
         // Освободить элемент в менеджере
         bool deleteObject(T *p) {
-          block* blk = m_pBlocks;
-          while (blk) {
-            if (p >= blk->pdata && p < blk->pdata + m_blkSize) {
+            block* blk = m_pBlocks;
+            while (blk) {
+                if (p >= blk->pdata && p < blk->pdata + m_blkSize) {
 
-              DestructElements(p);
-              *reinterpret_cast<uint32_t *> (p) = blk->firstFreeIndex;
-              --blk->usedCount;
-              auto current = p;
-              auto start = blk->pdata;
-              blk->firstFreeIndex = current - start;
-              // if (blk->firstFreeIndex > current - start || blk->firstFreeIndex == NO_FREE_CELL_INDICATOR) {
-              //  blk->firstFreeIndex = current - start;
-              // }
-              return true;
+                    DestructElements(p);
+                    *reinterpret_cast<uint32_t *> (p) = blk->firstFreeIndex;
+                    --blk->usedCount;
+                    auto current = p;
+                    auto start = blk->pdata;
+                    blk->firstFreeIndex = current - start;
+                    // if (blk->firstFreeIndex > current - start || blk->firstFreeIndex == NO_FREE_CELL_INDICATOR) {
+                    //  blk->firstFreeIndex = current - start;
+                    // }
+                    return true;
+                }
+                blk = blk->pnext;
             }
-            blk = blk->pnext;
-          }
-          return false;
+            return false;
         }
+
 
         // Очистка данных, зависит от m_isDeleteElementsOnDestruct
         void clear() {
 
-          bool* emptyMask = new bool[m_blkSize];
-          while (m_pBlocks != nullptr) {
-            block *tmp = m_pBlocks;
-            if (!m_isDeleteElementsOnDestruct && tmp->usedCount) {
-              throw CException();
+            bool* emptyMask = new bool[m_blkSize];
+            while (m_pBlocks != nullptr) {
+                block *tmp = m_pBlocks;
+                if (!m_isDeleteElementsOnDestruct && tmp->usedCount) {
+                    throw CException();
+                }
+                m_pBlocks = m_pBlocks->pnext;
+                deleteBlock(tmp, emptyMask);
             }
-            m_pBlocks = m_pBlocks->pnext;
-            deleteBlock(tmp, emptyMask);
-          }
-          delete[] emptyMask;
-          m_pBlocks = nullptr;
-          m_pCurrentBlk = nullptr;
+            delete[] emptyMask;
+            m_pBlocks = nullptr;
+            m_pCurrentBlk = nullptr;
         }
 
     private:
         // Создать новый блок данных. применяется в newObject
-        block* newBlock() {
-          block* p = new block;
-
-          p->pdata = reinterpret_cast<T *>(new char[m_blkSize * sizeof(T)]);
-          for (int i = 0; i < m_blkSize - 1; ++i) {
-            *reinterpret_cast<uint32_t *>(p->pdata + i) = i + 1;
-          }
-          *reinterpret_cast<uint32_t *>(p->pdata + m_blkSize - 1) = NO_FREE_CELL_INDICATOR;
-          p->pnext = nullptr;
-          p->firstFreeIndex = 0;
-          p->usedCount = 0;
-
-          if (m_pBlocks == nullptr) {
-            m_pBlocks = m_pCurrentBlk = p;
-          } else {
-            p->pnext = m_pBlocks;
-            m_pBlocks = p;
-          }
-
-          return p;
+        block *newBlock() {
+            T *data = reinterpret_cast<T *>(new char[m_blkSize * sizeof(T)]);
+            auto new_block = new block(data);
+            for (int i = 0; i < m_blkSize; ++i) {
+                *(reinterpret_cast<int *>(data + i)) = i + 1;
+            }
+            return new_block;
         }
 
         // Освободить память блока данных. Применяется в clear
         void deleteBlock(block* p, bool* emptyMask) {
-          if (m_isDeleteElementsOnDestruct) {
+            if (m_isDeleteElementsOnDestruct) {
 
-            std::memset(emptyMask, 0, m_blkSize * sizeof(bool));
-            while (p->firstFreeIndex != NO_FREE_CELL_INDICATOR) {
-              emptyMask[p->firstFreeIndex] = 1;
-              p->firstFreeIndex = *reinterpret_cast<uint32_t *>(p->pdata + p->firstFreeIndex);
+                std::memset(emptyMask, 0, m_blkSize * sizeof(bool));
+                while (p->firstFreeIndex < m_blkSize) {
+                    emptyMask[p->firstFreeIndex] = 1;
+                    p->firstFreeIndex = *reinterpret_cast<uint32_t *>(p->pdata + p->firstFreeIndex);
+                }
+                for (int i = 0; i < m_blkSize; ++i) {
+                    if (!emptyMask[i]) {
+                        p->pdata[i].~T();
+                    }
+                }
             }
-            for (int i = 0; i < m_blkSize; ++i) {
-              if (!emptyMask[i]) {
-                p->pdata[i].~T();
-              }
-            }
-          }
-          delete[] reinterpret_cast<char*>(p->pdata);
-          delete p;
-          p = nullptr;
+            delete[] reinterpret_cast<char*>(p->pdata);
+            delete p;
+            p = nullptr;
         }
 
         // Размер блока
@@ -177,7 +174,6 @@ namespace lab618 {
         // Удалять ли элементы при освобождении
         bool m_isDeleteElementsOnDestruct;
     };
-
 };  // namespace lab618
 
 #endif  // #define MEMORY_MANAGER_HEAD_H_2023_02_10

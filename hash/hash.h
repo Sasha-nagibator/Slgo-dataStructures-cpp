@@ -12,7 +12,7 @@ namespace lab618
     функция вычисления хеша - unsigned int HashFunc(const T* pElement);
     функция сравнения - int Compare(const T *pElement, const T* pElement2).
 
-     Класс реализует алгоритм контейнера Хеш-таблица (ассоциативный массив). Данный алгоритм базируется (!) на идее формирования линейной адресации
+     Класс реализует алгоритм контейнера Хеш-таблица (ассоциативный массив). Данный алгоритм базируется на идее формирования линейной адресации
     произвольных элементов в зависимости от специально вычисляемого целого значения, уникального для каждого элемента (хеш).
      Формирование линейной адресации позволяет получать и сохранять элементы в контейнер за время не зависящее от числа элементов в контейнере — O(1).
      В идеальном случае каждому хешу соответствует ячейка в линейном массиве данных. На самом деле подобрать функцию вычисления хеша, таким образом,
@@ -74,17 +74,17 @@ namespace lab618
                   m_pTable(new leaf*[hashTableSize]),
                   m_Memory(CMemoryManager<leaf>(defaultBlockSize, true))
         {
-          for (int i = 0; i < hashTableSize; ++i)
-          {
-            m_pTable[i] = nullptr;
-          }
+            for (int i = 0; i < hashTableSize; ++i)
+            {
+                m_pTable[i] = nullptr;
+            }
         }
         /**
         Деструктор. Должен освобождать всю выделенную память
         */
         virtual ~CHash()
         {
-          clear();
+            clear();
 
         }
 
@@ -93,37 +93,37 @@ namespace lab618
         */
         bool add(T* pElement)
         {
-          unsigned int idx;
-          leaf *foundLeaf = findLeaf(pElement, idx);
+            unsigned int idx;
+            leaf *foundLeaf = findLeaf(pElement, idx);
 
-          if (foundLeaf != nullptr) {
-            return false;
-          }
+            if (foundLeaf != nullptr) {
+                return false;
+            }
 
-          leaf *newLeaf = m_Memory.newObject();
-          newLeaf->pData = pElement;
-          newLeaf->pnext = m_pTable[idx];
-          m_pTable[idx] = newLeaf;
-          return true;
+            leaf *newLeaf = m_Memory.newObject();
+            newLeaf->pData = pElement;
+            newLeaf->pnext = m_pTable[idx];
+            m_pTable[idx] = newLeaf;
+            return true;
         }
         /**
-        Функция обновления элемента в Хеш-таблице. Обновляет, если элемент уже есть; добавляет, если элемента еще нет.
+        Функция обновления элемента в Хеш-таблице. Обновляет, если элемент уже есть добавляет, если элемента еще нет.
         Возвращает false, если был добавлен новый элемент, true если элемент обновлен.
         */
         bool update(T* pElement)
         {
-          unsigned int idx;
-          leaf *foundLeaf = findLeaf(pElement, idx);
+            unsigned int idx;
+            leaf *foundLeaf = findLeaf(pElement, idx);
 
-          if (foundLeaf != nullptr)
-          {
-            foundLeaf->pData = pElement;
-            return true;
-          }
-          else
-          {
-            return !add(pElement);
-          }
+            if (foundLeaf != nullptr)
+            {
+                foundLeaf->pData = pElement;
+                return true;
+            }
+            else
+            {
+                return !add(pElement);
+            }
         }
 
         /**
@@ -131,63 +131,52 @@ namespace lab618
         Обратите внимание, что для поиска используется частично заполненный объект, т.е. В нем должны быть заполнены поля на основе которых рассчитывается хеш.*/
         T* find(const T& element)
         {
-          unsigned int idx;
-          leaf *foundLeaf = findLeaf(const_cast<T*>(&element), idx);
+            unsigned int idx;
+            leaf *foundLeaf = findLeaf(const_cast<T*>(&element), idx);
 
-          if (foundLeaf != nullptr)
-          {
-            return foundLeaf->pData;
-          }
-          return nullptr;
+            if (foundLeaf != nullptr)
+            {
+                return foundLeaf->pData;
+            }
+            return nullptr;
         }
-
 
         /**
         Функция удаления элемента из Хеш-таблицы. Возвращает false, если не нашлось элемента, true если элемент был удален.
         */
-        bool remove(const T& element)
-        {
-          unsigned int hash = HashFunc(const_cast<T*>(&element));
-          unsigned int idx = hash % m_tableSize;
-
-          leaf *foundLeaf = m_pTable[idx];
-
-          if (foundLeaf == nullptr)
-          {
-            return false;
-          }
-
-          leaf *prevLeaf = nullptr;
-          leaf *curLeaf = m_pTable[idx];
-
-          while (curLeaf != nullptr)
-          {
-            if (curLeaf == foundLeaf)
-            {
-              if (prevLeaf != nullptr)
-              {
-                prevLeaf->pnext = curLeaf->pnext;
-              }
-              else
-              {
-                m_pTable[idx] = curLeaf->pnext;
-              }
-              m_Memory.deleteObject(curLeaf);
-              return true;
+        bool remove(const T& element) {
+            unsigned int index;
+            leaf* pLeaf = findLeaf(&element, index);
+            if (pLeaf == nullptr) {
+                return false;
             }
-            prevLeaf = curLeaf;
-            curLeaf = curLeaf->pnext;
-          }
-          return false;
+
+            leaf* pPrevLeaf = nullptr;
+            leaf* pCurrentLeaf = m_pTable[index];
+            while (pCurrentLeaf != nullptr) {
+                if (Compare(pCurrentLeaf->pData, &element) == 0) {
+                    if (pPrevLeaf != nullptr) {
+                        pPrevLeaf->pnext = pCurrentLeaf->pnext;
+                    } else {
+                        m_pTable[index] = pCurrentLeaf->pnext;
+                    }
+                    m_Memory.deleteObject(pCurrentLeaf);
+                    return true;
+                }
+                pPrevLeaf = pCurrentLeaf;
+                pCurrentLeaf = pCurrentLeaf->pnext;
+            }
+            return false;
         }
 
         /**
         Удаление всех элементов. Можно вызвать в деструкторе
         */
         void clear() {
-          m_Memory.clear();
-          delete[] m_pTable;
-          m_pTable = nullptr;
+            for (int i = 0; i < m_tableSize; ++i) {
+                m_pTable[i] = nullptr;
+            }
+            m_Memory.clear();
         }
     private:
         /**
@@ -202,26 +191,26 @@ namespace lab618
         */
         leaf *findLeaf(const T* pElement, unsigned int & idx)
         {
-          unsigned int hash = HashFunc(pElement);
-          idx = hash % m_tableSize;
-          if (m_pTable == nullptr) {
-            m_pTable = new leaf* [m_tableSize];
-            for (int i = 0; i < m_tableSize; ++i)
-            {
-              m_pTable[i] = nullptr;
+            unsigned int hash = HashFunc(pElement);
+            idx = hash % m_tableSize;
+            if (m_pTable == nullptr) {
+                m_pTable = new leaf* [m_tableSize];
+                for (int i = 0; i < m_tableSize; ++i)
+                {
+                    m_pTable[i] = nullptr;
+                }
             }
-          }
-          leaf *curLeaf = m_pTable[idx];
+            leaf *curLeaf = m_pTable[idx];
 
-          while (curLeaf != nullptr)
-          {
-            if (Compare(curLeaf->pData, pElement) == 0)
+            while (curLeaf != nullptr)
             {
-              return curLeaf;
+                if (Compare(curLeaf->pData, pElement) == 0)
+                {
+                    return curLeaf;
+                }
+                curLeaf = curLeaf->pnext;
             }
-            curLeaf = curLeaf->pnext;
-          }
-          return nullptr;
+            return nullptr;
         }
 
         /**

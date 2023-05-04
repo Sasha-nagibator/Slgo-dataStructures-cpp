@@ -1,8 +1,8 @@
-# Install script for directory: /home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/hash/cmake-build-debug/_deps/doctest-src
+# Install script for directory: C:/Users/User/CLionProjects/untitled1/cmake-build-debug/_deps/doctest-src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/usr/local")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/untitled1")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -27,11 +27,6 @@ if(NOT CMAKE_INSTALL_COMPONENT)
   endif()
 endif()
 
-# Install shared libraries without execute permission?
-if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
-  set(CMAKE_INSTALL_SO_NO_EXE "1")
-endif()
-
 # Is this installation the result of a crosscompile?
 if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
@@ -39,24 +34,24 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "/usr/bin/objdump")
+  set(CMAKE_OBJDUMP "C:/Users/User/Desktop/JetBrains/CLion 2021.3.4/bin/mingw/bin/objdump.exe")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/doctest" TYPE FILE FILES "/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/hash/cmake-build-debug/_deps/doctest-src/doctest/doctest.h")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/doctest" TYPE FILE FILES "C:/Users/User/CLionProjects/untitled1/cmake-build-debug/_deps/doctest-src/doctest/doctest.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/doctest" TYPE FILE FILES
-    "/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/hash/cmake-build-debug/_deps/doctest-build/generated/doctestConfig.cmake"
-    "/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/hash/cmake-build-debug/_deps/doctest-build/generated/doctestConfigVersion.cmake"
+    "C:/Users/User/CLionProjects/untitled1/cmake-build-debug/_deps/doctest-build/generated/doctestConfig.cmake"
+    "C:/Users/User/CLionProjects/untitled1/cmake-build-debug/_deps/doctest-build/generated/doctestConfigVersion.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/doctest" TYPE FILE FILES
-    "/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/hash/cmake-build-debug/_deps/doctest-src/scripts/cmake/doctest.cmake"
-    "/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/hash/cmake-build-debug/_deps/doctest-src/scripts/cmake/doctestAddTests.cmake"
+    "C:/Users/User/CLionProjects/untitled1/cmake-build-debug/_deps/doctest-src/scripts/cmake/doctest.cmake"
+    "C:/Users/User/CLionProjects/untitled1/cmake-build-debug/_deps/doctest-src/scripts/cmake/doctestAddTests.cmake"
     )
 endif()
 
@@ -64,7 +59,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/doctest/doctestTargets.cmake")
     file(DIFFERENT EXPORT_FILE_CHANGED FILES
          "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/doctest/doctestTargets.cmake"
-         "/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/hash/cmake-build-debug/_deps/doctest-build/CMakeFiles/Export/lib/cmake/doctest/doctestTargets.cmake")
+         "C:/Users/User/CLionProjects/untitled1/cmake-build-debug/_deps/doctest-build/CMakeFiles/Export/lib/cmake/doctest/doctestTargets.cmake")
     if(EXPORT_FILE_CHANGED)
       file(GLOB OLD_CONFIG_FILES "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/doctest/doctestTargets-*.cmake")
       if(OLD_CONFIG_FILES)
@@ -73,6 +68,6 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
       endif()
     endif()
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/doctest" TYPE FILE FILES "/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/hash/cmake-build-debug/_deps/doctest-build/CMakeFiles/Export/lib/cmake/doctest/doctestTargets.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/doctest" TYPE FILE FILES "C:/Users/User/CLionProjects/untitled1/cmake-build-debug/_deps/doctest-build/CMakeFiles/Export/lib/cmake/doctest/doctestTargets.cmake")
 endif()
 
