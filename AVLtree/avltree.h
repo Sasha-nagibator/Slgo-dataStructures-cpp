@@ -14,7 +14,7 @@ namespace lab618
             T* pData;
             leaf *pLeft;
             leaf *pRight;
-            int diff;  // difference in height
+            int diff;
         };
 
     public:
@@ -41,15 +41,15 @@ namespace lab618
           return addRecursively(m_pRoot, pElement);
         }
 
-        bool update(T* pElement)
-        {
-          T* pOldElement = find(*pElement);
-          if (pOldElement != nullptr)
-          {
-            *pOldElement = *pElement;
+        bool update(T* pElement) {
+          leaf* elem_leaf = findLeaf(m_pRoot, pElement);
+          if (elem_leaf == nullptr) {
+            add(pElement);
+            return false;
+          } else {
+            elem_leaf->pData = pElement;
             return true;
           }
-          return false;
         }
 
         T* find(const T& pElement)
@@ -72,44 +72,67 @@ namespace lab618
         leaf* m_pRoot;
         CMemoryManager<leaf> m_Memory;
 
-        // Utility function to update height of a node
-        void updateHeight(leaf *pNode) {
-          int heightLeft = pNode->pLeft ? pNode->pLeft->diff + 1 : 0;
-          int heightRight = pNode->pRight ? pNode->pRight->diff + 1 : 0;
-          pNode->diff = heightLeft - heightRight;
+        int getDiff(leaf* pNode) {
+          if (pNode != nullptr) {
+            return pNode->diff;
+          }
+          return 0;
         }
 
-        void rotateLeft(leaf*& pNode)
+        int getDiffDiff(leaf* pNode) {
+          return getDiff(pNode->pRight) - getDiff(pNode->pLeft);
+        }
+
+        void changeDiff(leaf* pNode) {
+          if (getDiff(pNode->pLeft) > getDiff(pNode->pRight)) {
+            pNode->diff = getDiff(pNode->pLeft) + 1;
+          } else {
+            pNode->diff = getDiff(pNode->pRight) + 1;
+          }
+        }
+
+        leaf* rotateLeft(leaf*& pNode)
         {
           leaf* pRight = pNode->pRight;
           pNode->pRight = pRight->pLeft;
           pRight->pLeft = pNode;
-          updateHeight(pNode);
-          updateHeight(pRight);
-          pNode = pRight;
+          changeDiff(pNode);
+          changeDiff(pRight);
+          return pRight;
         }
 
-        void rotateRight(leaf*& pNode)
+        leaf* rotateRight(leaf*& pNode)
         {
           leaf* pLeft = pNode->pLeft;
           pNode->pLeft = pLeft->pRight;
           pLeft->pRight = pNode;
-          updateHeight(pNode);
-          updateHeight(pLeft);
-          pNode = pLeft;
+          changeDiff(pNode);
+          changeDiff(pLeft);
+          return pLeft;
         }
 
-        void bigRotateLeft(leaf*& pNode)
+        leaf* balanceNode(leaf*& pNode)
         {
-          rotateRight(pNode->pRight);
-          rotateLeft(pNode);
+          changeDiff(pNode);
+          if (getDiffDiff(pNode) == 2)
+          {
+            if (getDiffDiff(pNode->pRight) < 0)
+            {
+              pNode->pRight = rotateRight(pNode->pRight);
+            }
+            pNode = rotateLeft(pNode);
+          }
+          else if (getDiffDiff(pNode) == -2)
+          {
+            if (getDiffDiff(pNode->pLeft) > 0)
+            {
+              pNode->pLeft = rotateLeft(pNode->pLeft);
+            }
+            pNode = rotateRight(pNode);
+          }
+          return pNode;
         }
 
-        void bigRotateRight(leaf*& pNode)
-        {
-          rotateLeft(pNode->pLeft);
-          rotateRight(pNode);
-        }
 
         bool addRecursively(leaf*& pNode, T* pElement)
         {
@@ -140,7 +163,7 @@ namespace lab618
 
           if (isHeightIncreased)
           {
-            updateHeight(pNode);
+            changeDiff(pNode);
             balanceNode(pNode);
           }
 
@@ -235,38 +258,11 @@ namespace lab618
 
           if (isHeightDecreased && pNode != nullptr)
           {
-            updateHeight(pNode);
+            changeDiff(pNode);
             balanceNode(pNode);
           }
 
           return isHeightDecreased;
-        }
-
-
-        void balanceNode(leaf*& pNode)
-        {
-          if (pNode->diff == -2)
-          {
-            if (pNode->pRight != nullptr && pNode->pRight->diff <= 0)
-            {
-              rotateLeft(pNode);
-            }
-            else
-            {
-              bigRotateLeft(pNode);
-            }
-          }
-          else if (pNode->diff == 2)
-          {
-            if (pNode->pLeft != nullptr && pNode->pLeft->diff >= 0)
-            {
-              rotateRight(pNode);
-            }
-            else
-            {
-              bigRotateRight(pNode);
-            }
-          }
         }
 
         leaf* findMinNode(leaf* pNode)
@@ -276,6 +272,19 @@ namespace lab618
             pNode = pNode->pLeft;
           }
           return pNode;
+        }
+
+        leaf* findLeaf(leaf* p, const T* pData) {
+          if (p == nullptr) {
+            return nullptr;
+          }
+          if (Compare(pData, p->pData) < 0) {
+            return findLeaf(p->pLeft, pData);
+          }
+          if (Compare(pData, p->pData) == 0) {
+            return p;
+          }
+          return findLeaf(p->pRight, pData);
         }
 
     };

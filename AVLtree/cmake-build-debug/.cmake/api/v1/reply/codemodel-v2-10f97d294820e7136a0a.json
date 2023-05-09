@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/AVLtree/cmake-build-debug",
-		"source" : "/home/aleksandr/Documents/6sem/baza/garbage/Algo-DataStructures/AVLtree"
+		"build" : "/home/aleksandr/Documents/6sem/baza/Algo-DataStructures/AVLtree/cmake-build-debug",
+		"source" : "/home/aleksandr/Documents/6sem/baza/Algo-DataStructures/AVLtree"
 	},
 	"version" : 
 	{
