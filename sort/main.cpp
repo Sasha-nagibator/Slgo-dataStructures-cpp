@@ -102,8 +102,8 @@ void templates::heapSort(void **ppArray, int length, templates::CompareSortType 
 }
 
 // merge sort
-
-void templates::mergeSort(void **ppArray, int length, templates::CompareSortType *pCompareFunc) {
+/*
+void templates::mergeSort(void **ppArray, int length, templates::CompareSortType pCompareFunc) {
   void **tempArray = new void *[length];
   mergeSortHelper(ppArray, tempArray, length, pCompareFunc);
   delete[] tempArray;
@@ -144,6 +144,7 @@ void templates::mergeSortHelper(void **ppArray, void **tempArray, int length, te
 
 
 }
+ */
 
 int main() {
   int len = 15;

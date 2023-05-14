@@ -12,7 +12,49 @@ namespace templates
     */
     typedef int (CompareSortType)(const void *pElem1, const void *pElem2);
 
-    void mergeSort(void **ppArray, int length, CompareSortType pCompareFunc);
+    void mergeSortHelper(void **ppArray, void **tempArray, int length, templates::CompareSortType *pCompareFunc);
+
+    void mergeSort(void **ppArray, int length, CompareSortType pCompareFunc) {
+      void **tempArray = new void *[length];
+      mergeSortHelper(ppArray, tempArray, length, pCompareFunc);
+      delete[] tempArray;
+    }
+
+    void mergeSortHelper(void **ppArray, void **tempArray, int length, templates::CompareSortType *pCompareFunc) {
+      if (length == 1) {
+        return;
+      }
+
+      int half = length / 2;
+      void **left = ppArray;
+      void **right = ppArray + half;
+
+      mergeSortHelper(left, tempArray, half, pCompareFunc);
+      mergeSortHelper(right, tempArray + half, length - half, pCompareFunc);
+
+      for (int i = 0, j = 0; i + j < length;) {
+        if (i == half) {
+          tempArray[i + j] = right[j];
+          ++j;
+        } else if (j == length - half) {
+          tempArray[i + j] = left[i];
+          ++i;
+        } else if (pCompareFunc(left[i], right[j]) > 0) {
+          tempArray[i + j] = left[i];
+          ++i;
+        } else {
+          tempArray[i + j] = right[j];
+          ++j;
+        }
+      }
+
+      for (int i = 0; i < length; ++i) {
+        ppArray[i] = tempArray[i];
+      }
+
+
+    }
+
     void heapSort(void **ppArray, int length, CompareSortType pCompareFunc);
 
     template <class T>
