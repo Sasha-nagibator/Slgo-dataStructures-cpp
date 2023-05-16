@@ -13,9 +13,8 @@ const std::string alphabet =
         "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ01234567"
         "89abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-const std::vector<int> amount = {10000, 20000, 30000, 40000, 50000,
-                                 60000, 70000, 80000, 90000, 100000,
-                                 110000, 120000, 130000, 140000};
+std::vector<int> amount(20);
+
 
 std::random_device rd;
 std::mt19937 gen(rd());
@@ -87,6 +86,9 @@ Test* binSearch(Test** ppArr, Test* elem, int length,
 }
 
 int main() {
+  for (int i = 1; i < 21; ++i) {
+    amount[i - 1] = i * 10000;
+  }
   double time;
   std::chrono::steady_clock::time_point start;
   std::chrono::steady_clock::time_point end;

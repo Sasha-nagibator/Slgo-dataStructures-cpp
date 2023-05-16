@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import os
 
 data_folder = "cmake-build-debug/data"
@@ -8,18 +9,23 @@ operations = ["creation", "find", "find_random", "delete"]
 data_structures = ["avl", "hash", "sort"]
 
 for operation in operations:
-    plt.figure(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     for data_structure in data_structures:
         file_name = f"{data_structure}_{operation}"
         file_path = os.path.join(data_folder, file_name)
-        
+
         with open(file_path, 'r') as file:
             data = list(map(float, file.read().split()))
-        
-        plt.plot(data, label=data_structure)
-    
-    plt.title(operation)
-    plt.legend()
-    plt.savefig(f"{operation}.png")
 
+        ax.plot(data, label=data_structure)
+
+    ax.set_title(operation)
+    ax.legend()
+
+    ax.set_xlabel('Number of elements (*10^4)')
+    ax.set_ylabel('sec')
+
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: f'{(x+1)}'))
+
+    fig.savefig(f"{operation}.png")
