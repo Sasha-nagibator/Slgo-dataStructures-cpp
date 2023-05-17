@@ -111,8 +111,8 @@ int main() {
       elem.first = RandStr();
       elem.second = RandStr();
     }
-    CAVLTree avlTree = CAVLTree<Test, TestCmp>(1024);
-    CHash hashTable = CHash<Test, TestHash, TestCmp>(n, 1024);
+    CAVLTree avlTree = CAVLTree<Test, TestCmp>(16394);
+    CHash hashTable = CHash<Test, TestHash, TestCmp>(n, 16394);
     Test **arr = new Test *[n];
 
     start = std::chrono::steady_clock::now();
@@ -231,7 +231,7 @@ int main() {
 
     start = std::chrono::steady_clock::now();
     for (const Test &i : elems) {
-      bool tmp = avlTree.remove(i);
+      bool tmp = hashTable.remove(i);
     }
     end = std::chrono::steady_clock::now();
     times_hash_remove.push_back(
