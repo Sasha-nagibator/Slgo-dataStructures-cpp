@@ -1,20 +1,19 @@
-#include <iostream>
 #include <chrono>
-#include <vector>
+#include <fstream>
+#include <iostream>
 #include <random>
 #include <string>
-#include <fstream>
+#include <vector>
 
-#include "hash.h"
 #include "avltree.h"
+#include "hash.h"
 #include "sort.h"
 
 const std::string alphabet =
-        "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ01234567"
-        "89abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ01234567"
+    "89abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 std::vector<int> amount(20);
-
 
 std::random_device rd;
 std::mt19937 gen(rd());
@@ -31,15 +30,15 @@ std::string RandStr() {
 }
 
 struct Test {
-    Test() {}
-    std::string first;
-    std::string second;
+  Test() {}
+  std::string first;
+  std::string second;
 };
 
 using namespace lab618;
 using namespace templates;
 
-int TestCmp(const Test* a, const Test* b) {
+int TestCmp(const Test *a, const Test *b) {
   if (a->first == b->first) {
     if (a->second == b->second) {
       return 0;
@@ -53,7 +52,7 @@ int TestCmp(const Test* a, const Test* b) {
   return -1;
 }
 
-unsigned int TestHash(const Test* a) {
+unsigned int TestHash(const Test *a) {
   unsigned int hash1 = 0;
   unsigned int hash2 = 0;
   unsigned int mod = 100013425;
@@ -67,8 +66,8 @@ unsigned int TestHash(const Test* a) {
   return hash1 ^ hash2;
 }
 
-Test* binSearch(Test** ppArr, Test* elem, int length,
-                int (*Compare)(const Test* pElement, const Test* pElement2)) {
+Test *binSearch(Test **ppArr, Test *elem, int length,
+                int (*Compare)(const Test *pElement, const Test *pElement2)) {
   if (length == 1) {
     if (Compare(ppArr[0], elem) == 0) {
       return ppArr[0];
@@ -108,13 +107,13 @@ int main() {
   std::vector<double> times_hash_remove;
   for (int n : amount) {
     std::vector elems = std::vector<Test>(n);
-    for (Test& elem : elems) {
+    for (Test &elem : elems) {
       elem.first = RandStr();
       elem.second = RandStr();
     }
     CAVLTree avlTree = CAVLTree<Test, TestCmp>(1024);
     CHash hashTable = CHash<Test, TestHash, TestCmp>(n, 1024);
-    Test** arr = new Test*[n];
+    Test **arr = new Test *[n];
 
     start = std::chrono::steady_clock::now();
     for (int i = 0; i < n; ++i) {
@@ -123,7 +122,7 @@ int main() {
     mergeSort(arr, n, TestCmp);
     end = std::chrono::steady_clock::now();
     times_sorted_creation.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::steady_clock::now();
     for (int i = 0; i < n; ++i) {
@@ -131,7 +130,7 @@ int main() {
     }
     end = std::chrono::steady_clock::now();
     times_avl_creation.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::steady_clock::now();
     for (int i = 0; i < n; ++i) {
@@ -139,82 +138,80 @@ int main() {
     }
     end = std::chrono::steady_clock::now();
     times_hash_creation.push_back(
-            std::chrono::duration<double>(end - start).count());
-
+        std::chrono::duration<double>(end - start).count());
 
     std::vector randElems2n = std::vector<Test>(2 * n);
-    for (Test& i : randElems2n) {
+    for (Test &i : randElems2n) {
       i.first = RandStr();
       i.second = RandStr();
     }
 
     start = std::chrono::steady_clock::now();
     for (int i = 0; i < n; ++i) {
-      Test* tmp = binSearch(arr, &elems[i], n, TestCmp);
+      Test *tmp = binSearch(arr, &elems[i], n, TestCmp);
     }
     end = std::chrono::steady_clock::now();
     times_sorted_find.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::steady_clock::now();
     for (int i = 0; i < n; ++i) {
-      Test* tmp = avlTree.find(elems[i]);
+      Test *tmp = avlTree.find(elems[i]);
     }
     end = std::chrono::steady_clock::now();
     times_avl_find.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::steady_clock::now();
     for (int i = 0; i < n; ++i) {
-      Test* tmp = hashTable.find(elems[i]);
+      Test *tmp = hashTable.find(elems[i]);
     }
     end = std::chrono::steady_clock::now();
     times_hash_find.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::steady_clock::now();
     for (int i = 0; i < 2 * n; ++i) {
-      Test* tmp = binSearch(arr, &randElems2n[i], n, TestCmp);
+      Test *tmp = binSearch(arr, &randElems2n[i], n, TestCmp);
     }
 
-    // pizda
     end = std::chrono::steady_clock::now();
     times_sorted_find_random.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::steady_clock::now();
-    for (const Test& i : randElems2n) {
-      Test* tmp = avlTree.find(i);
+    for (const Test &i : randElems2n) {
+      Test *tmp = avlTree.find(i);
     }
     end = std::chrono::steady_clock::now();
     times_avl_find_random.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::steady_clock::now();
-    for (const Test& i : randElems2n) {
-      Test* tmp = hashTable.find(i);
+    for (const Test &i : randElems2n) {
+      Test *tmp = hashTable.find(i);
     }
     end = std::chrono::steady_clock::now();
     times_hash_find_random.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::steady_clock::now();
     delete[] arr;
     end = std::chrono::steady_clock::now();
     times_sorted_delete.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::steady_clock::now();
     avlTree.clear();
     end = std::chrono::steady_clock::now();
     times_avl_delete.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::steady_clock::now();
     hashTable.clear();
     end = std::chrono::steady_clock::now();
     times_hash_delete.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     for (int i = 0; i < n; ++i) {
       avlTree.add(&elems[i]);
@@ -225,27 +222,25 @@ int main() {
     }
 
     start = std::chrono::steady_clock::now();
-    for (const Test& i : elems) {
+    for (const Test &i : elems) {
       bool tmp = avlTree.remove(i);
     }
     end = std::chrono::steady_clock::now();
     times_avl_remove.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::steady_clock::now();
-    for (const Test& i : elems) {
+    for (const Test &i : elems) {
       bool tmp = avlTree.remove(i);
     }
     end = std::chrono::steady_clock::now();
     times_hash_remove.push_back(
-            std::chrono::duration<double>(end - start).count());
+        std::chrono::duration<double>(end - start).count());
 
     std::cout << "Completed : " << n << std::endl;
 
-    // TODO : замерять позаписывать в файлы и нарисовать графики
   }
   std::ofstream out;
-
 
   out.open("data/sort_creation");
   for (double i : times_sorted_creation) {
