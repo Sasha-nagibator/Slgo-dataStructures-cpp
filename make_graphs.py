@@ -25,7 +25,7 @@ for operation in operations:
     ax.set_title(operation)
     ax.legend()
 
-    ax.set_xlabel('Number of elements (*10^4)')
+    ax.set_xlabel('Number of elements (*10^5)')
     ax.set_ylabel('sec')
 
     ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: f'{(x+1)}'))

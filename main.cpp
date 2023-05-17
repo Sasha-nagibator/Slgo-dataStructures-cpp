@@ -13,7 +13,7 @@ const std::string alphabet =
     "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ01234567"
     "89abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-std::vector<int> amount(20);
+std::vector<int> amount(10);
 
 std::random_device rd;
 std::mt19937 gen(rd());
@@ -85,8 +85,8 @@ Test *binSearch(Test **ppArr, Test *elem, int length,
 }
 
 int main() {
-  for (int i = 1; i < 21; ++i) {
-    amount[i - 1] = i * 10000;
+  for (int i = 1; i < 11; ++i) {
+    amount[i - 1] = i * 100000;
   }
   double time;
   std::chrono::steady_clock::time_point start;
